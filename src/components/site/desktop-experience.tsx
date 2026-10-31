@@ -116,7 +116,7 @@ export function DesktopExperience() {
                     alt={current.alt}
                     fill
                     sizes="(max-width: 1024px) 92vw, 58vw"
-                    className="object-cover object-top"
+                    className="object-cover object-center"
                   />
                 </motion.div>
               </AnimatePresence>

@@ -5,17 +5,20 @@
  * and copy. Everything that is expected to change after launch lives here.
  *
  * ─── ASSET NOTES ──────────────────────────────────────────────────────────
- * desktop-home.webp     Real desktop app screenshot — Home / browsing view
- * desktop-library.webp  Real desktop app screenshot — Library + listening stats
- * desktop-lyrics.webp   Real desktop app screenshot — Now Playing / synced lyrics
- * mobile-home.webp      Real mobile app render — "Listen Now" home screen (device shot)
- * mobile-lyrics-warm.webp Real mobile app render — synced lyrics, warm ambient crop
- * promo-*.webp          Official promotional artwork (provided brand assets)
+ * tv-nowplaying.webp          Real TV app screenshot — Now Playing with synced
+ *                             lyrics + Up Next queue (16:9 capture)
+ * tv-fullscreen.webp          Real TV app screenshot — fullscreen Now Playing
+ * desktop-home.webp           Desktop app screenshot — Home / browsing view
+ * desktop-library-real.webp   Real desktop app screenshot — Library + stats
+ * desktop-nowplaying.webp     Real desktop app screenshot — Now Playing + lyrics
+ * mobile-home.webp            Mobile app render — "Listen Now" home screen
+ * mobile-lyrics-warm.webp     Mobile app render — synced lyrics, warm ambient crop
+ * promo-*.webp                Official promotional artwork (provided brand assets)
  *
- * ─── MISSING ASSETS (to add later) ────────────────────────────────────────
- * • TV application screenshots — the TV mockups currently render a branded
- *   placeholder plate (see <TvScreenPlate />). Replace by pointing the
- *   `tvScreenshots` entries below at real 16:9 captures.
+ * ─── ASSETS STILL TO SWAP (as more captures arrive) ──────────────────────
+ * • Mobile app screenshots — current mobile renders can be replaced with real
+ *   device captures as they become available.
+ * • Desktop Home view — can be refreshed with a newer capture when ready.
  *
  * ─── DOWNLOAD LINKS ───────────────────────────────────────────────────────
  * No official download URLs have been published yet. Set `downloadUrl` for
@@ -132,11 +135,15 @@ export const FAQ_ITEMS = [
 export const SCREENSHOTS = {
   desktop: {
     home: "/assets/desktop/desktop-home.webp",
-    library: "/assets/desktop/desktop-library.webp",
-    lyrics: "/assets/desktop/desktop-lyrics.webp",
+    library: "/assets/desktop/desktop-library-real.webp",
+    lyrics: "/assets/desktop/desktop-nowplaying.webp",
     /** dedicated hero copy (kept separate so the hero can preload it eagerly
      *  while the same screenshot appears lazily further down the page) */
     hero: "/assets/desktop/desktop-hero.webp",
+  },
+  tv: {
+    nowplaying: "/assets/tv/tv-nowplaying.webp",
+    fullscreen: "/assets/tv/tv-fullscreen.webp",
   },
   mobile: {
     home: "/assets/mobile/mobile-home.webp",

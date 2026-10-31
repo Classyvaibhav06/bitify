@@ -29,7 +29,7 @@ export function MonitorFrame({ children, className, parallax = true }: MonitorFr
       {/* bezel */}
       <div className="relative rounded-[18px] border border-white/10 bg-gradient-to-b from-[#1a1a20] to-[#101014] p-[10px] pb-[20px] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
         {/* screen */}
-        <div className="relative aspect-[3/2] overflow-hidden rounded-[10px] bg-black ring-1 ring-white/10">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-[10px] bg-black ring-1 ring-white/10">
           {children}
           {/* glass reflection */}
           <div
