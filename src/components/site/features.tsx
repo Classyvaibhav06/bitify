@@ -4,37 +4,47 @@ import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import {
-  ArrowDownToLine,
   BarChart3,
   Library,
   Repeat2,
+  Search,
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { WindowFrame } from "./devices/window-frame";
-import { SCREENSHOTS } from "@/lib/site-config";
+import { PhoneMockup } from "./devices/phone-mockup";
+import { MOBILE_SCREENS, SCREENSHOTS, type MobileScreen } from "@/lib/site-config";
 
-const TILES = [
+const TILES: {
+  icon: typeof Library;
+  title: string;
+  text: string;
+  screen: MobileScreen;
+}[] = [
   {
     icon: Library,
     title: "A library that's yours",
     text: "Liked Music, playlists and collections — organized the way you listen, not the way an algorithm thinks.",
-  },
-  {
-    icon: ArrowDownToLine,
-    title: "Offline & local files",
-    text: "Downloads and Local Music are first-class citizens in the sidebar. Your files, your library, one place.",
+    screen: MOBILE_SCREENS.liked,
   },
   {
     icon: BarChart3,
     title: "Your listening, measured",
-    text: "A dedicated panel turns minutes, plays and top artists into a story of what your year sounded like.",
+    text: "Minutes, plays, streaks and top artists — a dedicated panel tells the story of what your year sounded like.",
+    screen: MOBILE_SCREENS.library,
+  },
+  {
+    icon: Search,
+    title: "Find any song, fast",
+    text: "Search that gets you straight to the track — results, versions and remixes in one list.",
+    screen: MOBILE_SCREENS.search,
   },
   {
     icon: Repeat2,
     title: "Playback, fully controlled",
     text: "Shuffle, repeat, queue and volume — every playback control stays within reach of the player bar.",
+    screen: MOBILE_SCREENS.nowplaying,
   },
-] as const;
+];
 
 export function Features() {
   const reduce = useReducedMotion();
@@ -128,25 +138,37 @@ export function Features() {
           </Reveal>
         </div>
 
-        {/* ---- tiles ---- */}
+        {/* ---- tiles with screenshots ---- */}
         <div className="mt-24 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TILES.map((tile, i) => (
             <Reveal key={tile.title} delay={i * 0.06}>
-              <div className="group relative h-full overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-7 transition-all duration-500 hover:-translate-y-1 hover:border-crimson/25 hover:bg-white/[0.035]">
+              <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] transition-all duration-500 hover:-translate-y-1 hover:border-crimson/25 hover:bg-white/[0.035]">
                 {/* hover glow */}
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-crimson/0 blur-2xl transition-all duration-700 group-hover:bg-crimson/15"
                 />
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.09] bg-white/[0.04] transition-colors duration-500 group-hover:border-crimson/40">
-                  <tile.icon className="h-5 w-5 text-warm-white" aria-hidden />
+                {/* real app screen inside the CSS phone */}
+                <div className="relative flex h-[330px] items-center justify-center overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(ellipse_75%_65%_at_50%_42%,rgba(224,57,62,0.08),transparent_72%)] pt-6">
+                  <div className="transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-[1.03] [--pw:158px]">
+                    <PhoneMockup
+                      screen={tile.screen}
+                      sizes="(max-width: 640px) 45vw, 158px"
+                    />
+                  </div>
                 </div>
-                <h3 className="mt-6 text-[15px] font-semibold tracking-wide text-warm-white">
-                  {tile.title}
-                </h3>
-                <p className="mt-2.5 text-[13px] leading-relaxed text-muted-warm">
-                  {tile.text}
-                </p>
+                {/* text */}
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.09] bg-white/[0.04] transition-colors duration-500 group-hover:border-crimson/40">
+                    <tile.icon className="h-[18px] w-[18px] text-warm-white" aria-hidden />
+                  </div>
+                  <h3 className="mt-5 text-[15px] font-semibold tracking-wide text-warm-white">
+                    {tile.title}
+                  </h3>
+                  <p className="mt-2.5 text-[13px] leading-relaxed text-muted-warm">
+                    {tile.text}
+                  </p>
+                </div>
               </div>
             </Reveal>
           ))}

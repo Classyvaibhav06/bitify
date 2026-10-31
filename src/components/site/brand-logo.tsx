@@ -23,7 +23,7 @@ export function BrandLogo({ className, withEqualizer = false, priority }: BrandL
         width={802}
         height={440}
         priority={priority}
-        className="h-9 w-auto select-none"
+        className="h-full w-auto select-none"
       />
       {withEqualizer && <Equalizer bars={4} className="h-3.5 opacity-70" />}
     </span>

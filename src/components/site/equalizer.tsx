@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 interface EqualizerProps {
@@ -16,7 +17,12 @@ interface EqualizerProps {
 
 /**
  * Restrained animated audio equalizer motif.
- * Falls back to a static row of bars for reduced-motion users.
+ *
+ * Each bar is driven purely by CSS (`--eq-i` sets its phase and tempo) so the
+ * motion starts immediately, even before hydration, and never requires JS.
+ * The pulse is deliberately pronounced — bars swing between ~22% and full
+ * height with a spring-like rhythm — so it always reads as "music playing".
+ * Falls back to a staggered static row of bars for reduced-motion users.
  */
 export function Equalizer({
   bars = 5,
@@ -36,7 +42,7 @@ export function Equalizer({
       role="img"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-end gap-[3px] h-4",
+        "inline-flex items-end gap-[3px]",
         isStatic && "opacity-80",
         className
       )}
@@ -49,11 +55,12 @@ export function Equalizer({
             barClassName,
             !isStatic && "eq-bar"
           )}
-          style={{
-            height: `${(heights[i % heights.length] * 100).toFixed(0)}%`,
-            animationDelay: `${(i * 0.13).toFixed(2)}s`,
-            animationDuration: `${(0.9 + (i % 3) * 0.18).toFixed(2)}s`,
-          }}
+          style={
+            {
+              height: `${(heights[i % heights.length] * 100).toFixed(0)}%`,
+              "--eq-i": i,
+            } as CSSProperties
+          }
         />
       ))}
     </span>

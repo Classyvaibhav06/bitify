@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -9,6 +9,15 @@ import { Reveal } from "./reveal";
 import { DESKTOP_NAV_ITEMS, SCREENSHOTS } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { selectPlatform } from "@/lib/platform-events";
+import { useHydrated } from "@/lib/use-hydrated";
+
+const LIVE = {
+  id: "live",
+  label: "Live",
+  video: "/assets/desktop/desktop-nowplaying-live.mp4",
+  poster: "/assets/desktop/desktop-nowplaying-live.webp",
+  alt: "Bitify Music desktop app — live recording of the full-screen Now Playing view with synced lyrics",
+} as const;
 
 const VIEWS = [
   {
@@ -31,10 +40,92 @@ const VIEWS = [
   },
 ] as const;
 
+type ViewId = (typeof VIEWS)[number]["id"] | (typeof LIVE)["id"];
+
+/**
+ * Real-time screen recording of the desktop app, looping silently.
+ * Pauses whenever the monitor leaves the viewport or the tab is hidden,
+ * so it never burns CPU/bandwidth in the background.
+ */
+function LiveNowPlayingVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let inView = true;
+
+    const sync = () => {
+      if (inView && !document.hidden) {
+        video.play().catch(() => {
+          /* autoplay refused — the poster frame stays until user interacts */
+        });
+      } else {
+        video.pause();
+      }
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries[0]?.isIntersecting ?? true;
+        sync();
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(video);
+
+    const onVisibility = () => sync();
+    document.addEventListener("visibilitychange", onVisibility);
+
+    sync();
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  return (
+    <div className="absolute inset-0 bg-black">
+      <video
+        ref={videoRef}
+        src={LIVE.video}
+        className="h-full w-full select-none object-cover object-center"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster={LIVE.poster}
+        disablePictureInPicture
+        controlsList="nodownload"
+        draggable={false}
+        aria-label={LIVE.alt}
+      />
+      {/* live badge */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-3.5 top-3.5 z-10 flex items-center gap-2 rounded-full border border-crimson/40 bg-black/55 px-3 py-1.5 backdrop-blur-sm sm:left-4 sm:top-4"
+      >
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson-bright opacity-70" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-crimson-bright" />
+        </span>
+        <span className="font-mono text-[9px] font-medium uppercase tracking-[0.28em] text-white/85">
+          Live recording
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function DesktopExperience() {
-  const [active, setActive] = useState<(typeof VIEWS)[number]["id"]>("home");
+  const [active, setActive] = useState<ViewId>("live");
   const reduce = useReducedMotion();
-  const current = VIEWS.find((v) => v.id === active)!;
+  // SSR-safe: first view renders visible; only tab switches animate in.
+  const mounted = useHydrated();
+  const current = VIEWS.find((v) => v.id === active);
 
   return (
     <section
@@ -105,19 +196,25 @@ export function DesktopExperience() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
-                  initial={reduce ? undefined : { opacity: 0, scale: 1.015 }}
+                  initial={mounted && !reduce ? { opacity: 0, scale: 1.015 } : false}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={reduce ? undefined : { opacity: 0 }}
                   transition={{ duration: 0.45, ease: "easeOut" }}
                   className="absolute inset-0"
                 >
-                  <Image
-                    src={current.src}
-                    alt={current.alt}
-                    fill
-                    sizes="(max-width: 1024px) 92vw, 58vw"
-                    className="object-cover object-center"
-                  />
+                  {active === "live" ? (
+                    <LiveNowPlayingVideo />
+                  ) : (
+                    current && (
+                      <Image
+                        src={current.src}
+                        alt={current.alt}
+                        fill
+                        sizes="(max-width: 1024px) 92vw, 58vw"
+                        className="object-cover object-center"
+                      />
+                    )
+                  )}
                 </motion.div>
               </AnimatePresence>
             </MonitorFrame>
@@ -130,7 +227,7 @@ export function DesktopExperience() {
               aria-label="Desktop app views"
               className="flex flex-wrap items-center gap-2"
             >
-              {VIEWS.map((view) => (
+              {[LIVE, ...VIEWS].map((view) => (
                 <button
                   key={view.id}
                   role="tab"
@@ -143,11 +240,34 @@ export function DesktopExperience() {
                       : "border border-white/[0.09] text-muted-warm hover:border-white/25 hover:text-warm-white"
                   )}
                 >
-                  {view.label}
+                  <span className="inline-flex items-center gap-2">
+                    {view.id === "live" && (
+                      <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                        <span
+                          className={cn(
+                            "absolute inline-flex h-full w-full animate-ping rounded-full opacity-60",
+                            active === "live" ? "bg-white" : "bg-crimson-bright"
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "relative inline-flex h-1.5 w-1.5 rounded-full",
+                            active === "live" ? "bg-white" : "bg-crimson-bright"
+                          )}
+                        />
+                      </span>
+                    )}
+                    {view.label}
+                  </span>
                 </button>
               ))}
-              <span className="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.25em] text-white/25 sm:block">
-                Actual app interface
+              <span
+                className={cn(
+                  "ml-auto hidden font-mono text-[10px] uppercase tracking-[0.25em] sm:block",
+                  active === "live" ? "text-crimson-bright/70" : "text-white/25"
+                )}
+              >
+                {active === "live" ? "Real-time app recording" : "Actual app interface"}
               </span>
             </div>
           </Reveal>

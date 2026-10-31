@@ -1,28 +1,29 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 interface RevealProps {
   children: ReactNode;
-  /** delay in seconds */
+  /** visual stagger hint in seconds (mapped to a small timeline-range shift) */
   delay?: number;
   /** distance in px the element travels up */
   y?: number;
   className?: string;
+  /** kept for API compatibility — CSS scroll reveals are naturally reversible */
   once?: boolean;
 }
 
 /**
- * Scroll-triggered reveal wrapper.
- * Automatically disabled for users preferring reduced motion.
+ * Scroll-triggered reveal wrapper — 100% CSS (scroll-driven animations).
  *
- * Robustness: uses framer-motion's `useInView` with `fallback: true` so that
- * environments without a working IntersectionObserver (some sandboxed
- * iframes / preview panes) still reveal the content. A short mount-time
- * safety net additionally forces visibility after 1.2s so nothing ever stays
- * stuck at opacity 0.
+ * Why not framer-motion `whileInView` / `useInView` here?
+ * In sandboxed preview iframes the IntersectionObserver callbacks can be
+ * unreliable, and if the client JS is stale or hydration fails, content
+ * wrapped in `initial={{ opacity: 0 }}` stays invisible forever (black
+ * sections). This implementation renders fully-visible server HTML and only
+ * *enhances* it with a native CSS `animation-timeline: view()` reveal.
+ *
+ * - Browsers without scroll-driven animations: content is simply always visible.
+ * - Users preferring reduced motion: animation disabled, content visible.
+ * - No JS, no hydration, no flash, no way to get stuck at opacity 0.
  */
 export function Reveal({
   children,
@@ -31,83 +32,37 @@ export function Reveal({
   className,
   once = true,
 }: RevealProps) {
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, {
-    once,
-    amount: 0.05,
-    fallback: true,
-  });
-  const [safeVisible, setSafeVisible] = useState(false);
+  // Map the delay hint to a shift of the view-timeline entry range so
+  // sibling reveals feel staggered. Ranges are wide (the animation glides
+  // through most of the element's entry) for an ultra-smooth, scroll-bound
+  // feel — see `.reveal` in globals.css.
+  const shift = Math.round(Math.min(Math.max(delay, 0), 0.6) * 60);
+  const start = Math.min(shift, 36);
+  const end = Math.min(start + 76, 100);
 
-  useEffect(() => {
-    if (inView) return;
-    const t = setTimeout(() => setSafeVisible(true), 1200);
-    return () => clearTimeout(t);
-  }, [inView]);
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
-  const shown = inView || safeVisible;
+  const style = {
+    "--reveal-y": `${y}px`,
+    animationRange: `entry ${start}% entry ${end}%`,
+  } as CSSProperties;
 
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      initial={{ opacity: 0, y }}
-      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      transition={{ duration: 0.9, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-    >
+    <div className={`reveal ${className ?? ""}`.trim()} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
 interface StaggerProps {
   children: ReactNode;
   className?: string;
-  /** stagger between children in seconds */
+  /** kept for API compatibility — stagger is handled via nth-child ranges */
   interval?: number;
 }
 
-/** Container that staggers its direct children reveals. */
+/** Container whose direct children reveal in a staggered sequence (CSS only). */
 export function StaggerGroup({ children, className, interval = 0.09 }: StaggerProps) {
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, {
-    once: true,
-    amount: 0.05,
-    fallback: true,
-  });
-  const [safeVisible, setSafeVisible] = useState(false);
-
-  useEffect(() => {
-    if (inView) return;
-    const t = setTimeout(() => setSafeVisible(true), 1200);
-    return () => clearTimeout(t);
-  }, [inView]);
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
-  const shown = inView || safeVisible;
-
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      initial="hidden"
-      animate={shown ? "visible" : "hidden"}
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: interval } },
-      }}
-    >
-      {children}
-    </motion.div>
+    <div className={`reveal-stagger ${className ?? ""}`.trim()}>{children}</div>
   );
 }
 
@@ -120,19 +75,10 @@ export function StaggerItem({
   className?: string;
   y?: number;
 }) {
+  const style = { "--reveal-y": `${y}px` } as CSSProperties;
   return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] },
-        },
-      }}
-    >
+    <div className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }

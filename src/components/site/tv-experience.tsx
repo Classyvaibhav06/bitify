@@ -1,33 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "./reveal";
-import { SCREENSHOTS } from "@/lib/site-config";
+import { DeviceShotImage } from "./devices/device-shot";
+import { Ambilight } from "./devices/ambilight";
+import { TV_SHOTS, type DeviceShot } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
+import { useHydrated } from "@/lib/use-hydrated";
 import { selectPlatform } from "@/lib/platform-events";
 
-const VIEWS = [
-  {
-    id: "nowplaying",
-    label: "Now Playing",
-    src: SCREENSHOTS.tv.nowplaying,
-    alt: "Bitify Music on TV — Now Playing view with album art, synced lyrics and an Up Next queue",
-  },
-  {
-    id: "fullscreen",
-    label: "Fullscreen",
-    src: SCREENSHOTS.tv.fullscreen,
-    alt: "Bitify Music on TV — fullscreen Now Playing view with large album art and playback controls",
-  },
-] as const;
+const VIEWS: DeviceShot[] = [TV_SHOTS.nowplaying, TV_SHOTS.fullscreen];
+
+const easeOut = [0.21, 0.47, 0.32, 0.98] as const;
 
 export function TvExperience() {
-  const [active, setActive] = useState<(typeof VIEWS)[number]["id"]>("nowplaying");
+  const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
-  const current = VIEWS.find((v) => v.id === active)!;
+  // SSR-safe: the first view renders fully visible; only tab switches animate.
+  const mounted = useHydrated();
+  const current = VIEWS[active];
 
   return (
     <section
@@ -60,74 +53,57 @@ export function TvExperience() {
           </p>
         </Reveal>
 
-        {/* ---- TV showcase (real captures, presented in-room) ---- */}
-        <Reveal delay={0.12} className="mx-auto mt-16 max-w-[940px] sm:mt-20">
+        {/* ---- TV showcase — the real set, presented in-room ---- */}
+        <Reveal delay={0.12} className="mx-auto mt-16 max-w-[980px] sm:mt-20">
           <div className="relative">
-            {/* screen light bleeding into the room */}
-            <div
-              aria-hidden
-              className="absolute -inset-x-10 -top-12 -bottom-8 -z-10 bg-[radial-gradient(ellipse_70%_55%_at_50%_50%,rgba(224,57,62,0.16),rgba(139,92,246,0.05)_50%,transparent_72%)] blur-2xl"
-            />
+            {/* ambilight — rear light strip behind the television */}
+            <Ambilight />
 
-            {/* the television — the capture already carries its own bezel */}
-            <div className="relative overflow-hidden rounded-[10px] bg-black shadow-[0_60px_140px_-20px_rgba(0,0,0,0.9)] ring-1 ring-white/10">
-              <div className="relative aspect-video overflow-hidden rounded-[6px]">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={active}
-                    initial={reduce ? undefined : { opacity: 0, scale: 1.012 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={reduce ? undefined : { opacity: 0 }}
-                    transition={{ duration: 0.45, ease: "easeOut" }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={current.src}
-                      alt={current.alt}
-                      fill
-                      sizes="(max-width: 1024px) 92vw, 940px"
-                      className="object-cover"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-                {/* glass reflection */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.05)_0%,transparent_32%)]"
-                />
-              </div>
-            </div>
+            {/* the television — a real capture carrying its own bezel */}
+            <div className="relative">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={current.src}
+                  initial={
+                    mounted && !reduce
+                      ? { opacity: 0, scale: 0.975, y: 14 }
+                      : false
+                  }
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={mounted && !reduce ? { opacity: 0, scale: 0.99, y: -10 } : { opacity: 0 }}
+                  transition={{ duration: 0.55, ease: easeOut }}
+                >
+                  <DeviceShotImage
+                    shot={current}
+                    fit="width"
+                    sizes="(max-width: 1024px) 92vw, 980px"
+                  />
+                </motion.div>
+              </AnimatePresence>
 
-            {/* slim center stand */}
-            <div
-              aria-hidden
-              className="absolute left-1/2 top-full -z-10 flex -translate-x-1/2 flex-col items-center"
-            >
-              <div className="h-10 w-[46px] rounded-t bg-gradient-to-b from-[#1a1a20] to-[#111116]" />
-              <div className="h-[6px] w-[190px] rounded-full bg-gradient-to-b from-[#222228] to-[#141419] shadow-[0_12px_28px_rgba(0,0,0,0.75)]" />
+              {/* floor reflection hint under the set */}
+              <div
+                aria-hidden
+                className="absolute left-1/2 top-full mt-3 h-14 w-[72%] -translate-x-1/2 rounded-[100%] bg-black/75 blur-2xl"
+              />
             </div>
-            {/* floor shadow */}
-            <div
-              aria-hidden
-              className="absolute left-1/2 top-full mt-[58px] h-10 w-[75%] -translate-x-1/2 rounded-[100%] bg-black/70 blur-2xl"
-            />
           </div>
 
           {/* view switcher */}
           <div
             role="tablist"
             aria-label="TV app views"
-            className="mt-24 flex flex-wrap items-center justify-center gap-2 sm:mt-28"
+            className="mt-14 flex flex-wrap items-center justify-center gap-2 sm:mt-16"
           >
-            {VIEWS.map((view) => (
+            {VIEWS.map((view, i) => (
               <button
-                key={view.id}
+                key={view.src}
                 role="tab"
-                aria-selected={active === view.id}
-                onClick={() => setActive(view.id)}
+                aria-selected={active === i}
+                onClick={() => setActive(i)}
                 className={cn(
-                  "rounded-full px-4 py-2 text-[12px] font-semibold tracking-wide transition-all duration-300",
-                  active === view.id
+                  "cursor-pointer rounded-full px-4 py-2 text-[12px] font-semibold tracking-wide transition-all duration-300",
+                  active === i
                     ? "bg-crimson text-white shadow-[0_8px_24px_-6px_rgba(224,57,62,0.55)]"
                     : "border border-white/[0.09] text-muted-warm hover:border-white/25 hover:text-warm-white"
                 )}
@@ -174,7 +150,7 @@ export function TvExperience() {
           <button
             type="button"
             onClick={() => selectPlatform("tv")}
-            className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-crimson-bright transition-colors hover:text-warm-white"
+            className="group inline-flex cursor-pointer items-center gap-2.5 text-sm font-semibold tracking-wide text-crimson-bright transition-colors hover:text-warm-white"
           >
             Explore TV
             <ArrowRight

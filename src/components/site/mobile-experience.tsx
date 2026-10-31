@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Heart, ListMusic, MicVocal, Play } from "lucide-react";
 import { Reveal } from "./reveal";
-import { SCREENSHOTS } from "@/lib/site-config";
+import { DeviceCoverflow } from "./device-coverflow";
 import { selectPlatform } from "@/lib/platform-events";
 
 const MOBILE_FEATURES = [
@@ -31,15 +28,13 @@ const MOBILE_FEATURES = [
   },
 ] as const;
 
+/**
+ * Mobile experience — the interactive 3D coverflow of the real Bitify app
+ * screens lives here: swipe, drag, use the arrow buttons or the dots to
+ * travel through every view of the mobile app. Below it, a quiet feature
+ * strip summarises what makes the pocket edition special.
+ */
 export function MobileExperience() {
-  const reduce = useReducedMotion();
-  const bannerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: bannerRef,
-    offset: ["start end", "end start"],
-  });
-  const bannerY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
-
   return (
     <section
       id="mobile"
@@ -49,10 +44,10 @@ export function MobileExperience() {
       {/* warm ambience for this section */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-[16%] -z-10 h-[560px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.07),transparent_65%)] blur-[100px]"
+        className="absolute left-1/2 top-[8%] -z-10 h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.07),transparent_65%)] blur-[100px]"
       />
 
-      <div className="mx-auto max-w-[1200px] px-6 py-28 sm:py-36">
+      <div className="mx-auto max-w-[1200px] px-6 py-24 sm:py-32">
         {/* ---- centered header ---- */}
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow inline-flex items-center gap-3">
@@ -70,51 +65,10 @@ export function MobileExperience() {
           </p>
         </Reveal>
 
-        {/* ---- phone composition ---- */}
-        <div className="relative mx-auto mt-20 flex h-[440px] max-w-[760px] items-center justify-center sm:h-[520px]">
-          {/* lyrics phone — behind, tilted */}
-          <Reveal
-            delay={0.15}
-            className="absolute left-1/2 top-1/2 w-[44%] max-w-[240px] -translate-x-[118%] -translate-y-[38%] rotate-[-8deg] sm:w-[38%]"
-          >
-            <div className="device-shadow relative aspect-[960/1341] overflow-hidden rounded-[22px] ring-1 ring-white/10 [mask-image:linear-gradient(to_bottom,black_78%,transparent_98%)]">
-              <Image
-                src={SCREENSHOTS.mobile.lyricsWarm}
-                alt="Bitify Music mobile app — synced lyrics view on a warm ambient render"
-                fill
-                sizes="(max-width: 640px) 44vw, 240px"
-                className="object-cover object-top"
-              />
-            </div>
-          </Reveal>
-
-          {/* primary phone — front */}
-          <Reveal delay={0.05} className="relative w-[54%] max-w-[300px] sm:w-[46%]">
-            <motion.div
-              animate={reduce ? undefined : { y: [0, -8, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="device-shadow relative aspect-[674/1396] overflow-hidden rounded-[30px] ring-1 ring-white/15"
-            >
-              <Image
-                src={SCREENSHOTS.mobile.home}
-                alt="Bitify Music mobile app — Listen Now home screen on a modern smartphone"
-                fill
-                sizes="(max-width: 640px) 54vw, 300px"
-                className="object-cover"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-[30px] bg-[linear-gradient(115deg,rgba(255,255,255,0.09)_0%,transparent_20%)]"
-              />
-            </motion.div>
-          </Reveal>
-
-          {/* soft light under phones */}
-          <div
-            aria-hidden
-            className="absolute bottom-4 left-1/2 h-24 w-[70%] -translate-x-1/2 rounded-[100%] bg-black/60 blur-2xl"
-          />
-        </div>
+        {/* ---- interactive 3D coverflow (all app screens) ---- */}
+        <Reveal delay={0.08} y={36} className="mt-14 sm:mt-18">
+          <DeviceCoverflow />
+        </Reveal>
 
         {/* ---- feature strip ---- */}
         <div className="mx-auto mt-20 grid max-w-4xl grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -136,11 +90,11 @@ export function MobileExperience() {
           ))}
         </div>
 
-        <Reveal delay={0.1} className="mt-14 text-center">
+        <Reveal delay={0.1} className="mt-12 text-center">
           <button
             type="button"
             onClick={() => selectPlatform("mobile")}
-            className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-crimson-bright transition-colors hover:text-warm-white"
+            className="group inline-flex cursor-pointer items-center gap-2.5 text-sm font-semibold tracking-wide text-crimson-bright transition-colors hover:text-warm-white"
           >
             Explore Mobile
             <ArrowRight
@@ -149,37 +103,6 @@ export function MobileExperience() {
             />
           </button>
         </Reveal>
-      </div>
-
-      {/* ---- full-bleed lifestyle banner ---- */}
-      <div
-        ref={bannerRef}
-        className="relative h-[62vh] min-h-[420px] w-full overflow-hidden"
-      >
-        <motion.div
-          style={reduce ? undefined : { y: bannerY }}
-          className="absolute -inset-y-[14%] inset-x-0"
-        >
-          <Image
-            src={SCREENSHOTS.promo.lifestyle}
-            alt="Bitify Music playing on a phone held in hand, with a desk setup in the background"
-            fill
-            sizes="100vw"
-            className="object-cover"
-          />
-        </motion.div>
-        {/* cinematic grade */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/70"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[#060607]/25"
-        />
-        <p className="absolute bottom-10 left-1/2 w-full -translate-x-1/2 px-6 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
-          Bitify Music — in the wild
-        </p>
       </div>
     </section>
   );

@@ -5,10 +5,11 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Monitor, Smartphone, Tv, ArrowUpRight } from "lucide-react";
 import { MonitorFrame } from "./devices/monitor-frame";
-import { TvFrame } from "./devices/tv-frame";
-import { TvScreenPlate } from "./devices/tv-screen-plate";
+import { PhoneMockup } from "./devices/phone-mockup";
+import { DeviceShotImage } from "./devices/device-shot";
+import { Ambilight } from "./devices/ambilight";
 import { Reveal } from "./reveal";
-import { SCREENSHOTS, type PlatformId } from "@/lib/site-config";
+import { SCREENSHOTS, MOBILE_SCREENS, TV_SHOTS, type PlatformId } from "@/lib/site-config";
 import { onPlatformSelect } from "@/lib/platform-events";
 import { cn } from "@/lib/utils";
 
@@ -231,29 +232,34 @@ export function Ecosystem() {
                 )}
 
                 {active === "mobile" && (
-                  <div className="mx-auto w-[200px] sm:w-[230px]">
-                    <div className="device-shadow relative aspect-[674/1396] overflow-hidden rounded-[26px] ring-1 ring-white/15">
-                      <Image
-                        src={SCREENSHOTS.mobile.home}
-                        alt="Bitify Music mobile application interface"
-                        fill
-                        sizes="240px"
-                        className="object-cover"
+                  <div className="mx-auto flex h-[360px] items-center justify-center sm:h-[420px]">
+                    {/* light pool behind the device */}
+                    <div
+                      aria-hidden
+                      className="absolute left-1/2 top-1/2 -z-10 h-[60%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-[100%] bg-[radial-gradient(ellipse,rgba(224,57,62,0.12),transparent_70%)] blur-2xl"
+                    />
+                    <motion.div
+                      animate={reduce ? undefined : { y: [0, -8, 0] }}
+                      transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+                      className="[--pw:172px] sm:[--pw:198px]"
+                    >
+                      <PhoneMockup
+                        screen={MOBILE_SCREENS.liked}
+                        sizes="(max-width: 640px) 172px, 198px"
                       />
-                      <div
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 rounded-[26px] bg-[linear-gradient(115deg,rgba(255,255,255,0.09)_0%,transparent_20%)]"
-                      />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
                 {active === "tv" && (
-                  <div className="mx-auto max-w-[600px]">
-                    <TvFrame>
-                      <TvScreenPlate variant="rich" />
-                    </TvFrame>
-                    <div className="h-16" aria-hidden />
+                  <div className="relative mx-auto w-full max-w-[620px]">
+                    {/* ambilight — rear light strip behind the television */}
+                    <Ambilight />
+                    <DeviceShotImage
+                      shot={TV_SHOTS.nowplaying}
+                      fit="width"
+                      sizes="(max-width: 1024px) 92vw, 620px"
+                    />
                   </div>
                 )}
               </motion.div>

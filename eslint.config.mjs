@@ -6,7 +6,12 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
+const eslintConfig = [
+  // build-tooling scripts are not part of the app
+  { ignores: ["scripts/**"] },
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
   rules: {
     // TypeScript rules
     "@typescript-eslint/no-explicit-any": "off",

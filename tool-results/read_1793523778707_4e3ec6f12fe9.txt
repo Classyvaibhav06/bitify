@@ -1,0 +1,1078 @@
+     1→@import "tailwindcss";
+     2→@import "tw-animate-css";
+     3→
+     4→@custom-variant dark (&:is(.dark *));
+     5→
+     6→@theme inline {
+     7→  --color-background: var(--background);
+     8→  --color-foreground: var(--foreground);
+     9→  --font-sans: var(--font-geist-sans);
+    10→  --font-mono: var(--font-geist-mono);
+    11→  --font-display: var(--font-space-grotesk);
+    12→  --color-ring: var(--ring);
+    13→  --color-input: var(--input);
+    14→  --color-border: var(--border);
+    15→  --color-destructive: var(--destructive);
+    16→  --color-accent-foreground: var(--accent-foreground);
+    17→  --color-accent: var(--accent);
+    18→  --color-muted-foreground: var(--muted-foreground);
+    19→  --color-muted: var(--muted);
+    20→  --color-secondary-foreground: var(--secondary-foreground);
+    21→  --color-secondary: var(--secondary);
+    22→  --color-primary-foreground: var(--primary-foreground);
+    23→  --color-primary: var(--primary);
+    24→  --color-popover-foreground: var(--popover-foreground);
+    25→  --color-popover: var(--popover);
+    26→  --color-card-foreground: var(--card-foreground);
+    27→  --color-card: var(--card);
+    28→  --radius-sm: calc(var(--radius) - 4px);
+    29→  --radius-md: calc(var(--radius) - 2px);
+    30→  --radius-lg: var(--radius);
+    31→  --radius-xl: calc(var(--radius) + 4px);
+    32→
+    33→  /* Bitify brand palette */
+    34→  --color-crimson: var(--crimson);
+    35→  --color-crimson-bright: var(--crimson-bright);
+    36→  --color-crimson-deep: var(--crimson-deep);
+    37→  --color-violet-glow: var(--violet-glow);
+    38→  --color-ink: var(--ink);
+    39→  --color-graphite: var(--graphite);
+    40→  --color-surface: var(--surface);
+    41→  --color-warm-white: var(--warm-white);
+    42→  --color-muted-warm: var(--muted-warm);
+    43→}
+    44→
+    45→:root {
+    46→  --radius: 0.625rem;
+    47→
+    48→  /* Bitify dark cinematic palette */
+    49→  --background: oklch(0.106 0.004 285);          /* #060607 deep black */
+    50→  --foreground: oklch(0.955 0.006 85);           /* warm white */
+    51→  --card: oklch(0.135 0.005 285);
+    52→  --card-foreground: oklch(0.955 0.006 85);
+    53→  --popover: oklch(0.14 0.005 285);
+    54→  --popover-foreground: oklch(0.955 0.006 85);
+    55→  --primary: oklch(0.585 0.199 22);              /* crimson #E0393E */
+    56→  --primary-foreground: oklch(0.985 0.002 85);
+    57→  --secondary: oklch(0.17 0.005 285);
+    58→  --secondary-foreground: oklch(0.955 0.006 85);
+    59→  --muted: oklch(0.165 0.005 285);
+    60→  --muted-foreground: oklch(0.66 0.008 85);      /* muted warm grey */
+    61→  --accent: oklch(0.585 0.199 22);
+    62→  --accent-foreground: oklch(0.985 0.002 85);
+    63→  --destructive: oklch(0.577 0.245 27.325);
+    64→  --border: oklch(1 0 0 / 8%);
+    65→  --input: oklch(1 0 0 / 10%);
+    66→  --ring: oklch(0.585 0.199 22 / 60%);
+    67→
+    68→  /* Brand tokens */
+    69→  --crimson: #e0393e;
+    70→  --crimson-bright: #f05055;
+    71→  --crimson-deep: #b4222b;
+    72→  --violet-glow: #8b5cf6;
+    73→  --ink: #060607;
+    74→  --graphite: #101014;
+    75→  --surface: #15151b;
+    76→  --warm-white: #f4f1ec;
+    77→  --muted-warm: #a6a09a;
+    78→}
+    79→
+    80→/* non-static position so framer-motion scroll offsets measure correctly */
+    81→html {
+    82→  position: relative;
+    83→}
+    84→
+    85→@layer base {
+    86→  * {
+    87→    @apply border-border outline-ring/50;
+    88→  }
+    89→  html {
+    90→    scroll-behavior: smooth;
+    91→    scroll-padding-top: 88px;
+    92→  }
+    93→  body {
+    94→    @apply bg-background text-foreground;
+    95→    text-rendering: optimizeLegibility;
+    96→    -webkit-font-smoothing: antialiased;
+    97→    overflow-x: hidden;
+    98→  }
+    99→  ::selection {
+   100→    background: rgba(224, 57, 62, 0.85);
+   101→    color: #fff;
+   102→  }
+   103→  @media (prefers-reduced-motion: reduce) {
+   104→    html {
+   105→      scroll-behavior: auto;
+   106→    }
+   107→  }
+   108→}
+   109→
+   110→/* ---------- Typography helpers ---------- */
+   111→.font-display {
+   112→  font-family: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
+   113→}
+   114→
+   115→.text-outline {
+   116→  color: transparent;
+   117→  -webkit-text-stroke: 1.5px rgba(244, 241, 236, 0.5);
+   118→}
+   119→
+   120→.eyebrow {
+   121→  font-family: var(--font-geist-mono), monospace;
+   122→  font-size: 0.6875rem;
+   123→  letter-spacing: 0.28em;
+   124→  text-transform: uppercase;
+   125→  color: var(--crimson);
+   126→  font-weight: 500;
+   127→}
+   128→
+   129→/* ---------- Ambient & texture ---------- */
+   130→.grain::after {
+   131→  content: "";
+   132→  position: absolute;
+   133→  inset: 0;
+   134→  pointer-events: none;
+   135→  opacity: 0.035;
+   136→  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+   137→  background-size: 256px 256px;
+   138→  z-index: 1;
+   139→}
+   140→
+   141→.hairline-grid {
+   142→  background-image:
+   143→    linear-gradient(to right, rgba(244, 241, 236, 0.045) 1px, transparent 1px);
+   144→  background-size: clamp(60px, 12.5vw, 160px) 100%;
+   145→}
+   146→
+   147→.glow-crimson {
+   148→  background: radial-gradient(
+   149→    ellipse 60% 45% at 50% 42%,
+   150→    rgba(224, 57, 62, 0.16),
+   151→    rgba(224, 57, 62, 0.05) 45%,
+   152→    transparent 72%
+   153→  );
+   154→}
+   155→
+   156→.glow-violet {
+   157→  background: radial-gradient(
+   158→    ellipse 55% 40% at 50% 55%,
+   159→    rgba(139, 92, 246, 0.09),
+   160→    transparent 70%
+   161→  );
+   162→}
+   163→
+   164→.device-shadow {
+   165→  filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.65))
+   166→    drop-shadow(0 12px 32px rgba(0, 0, 0, 0.5));
+   167→}
+   168→
+   169→.screen-glow {
+   170→  box-shadow:
+   171→    0 0 0 1px rgba(255, 255, 255, 0.07),
+   172→    0 0 48px rgba(224, 57, 62, 0.1),
+   173→    0 24px 80px rgba(0, 0, 0, 0.55);
+   174→}
+   175→
+   176→/* ---------- Custom scrollbar ---------- */
+   177→::-webkit-scrollbar {
+   178→  width: 10px;
+   179→}
+   180→::-webkit-scrollbar-track {
+   181→  background: #060607;
+   182→}
+   183→::-webkit-scrollbar-thumb {
+   184→  background: #26262c;
+   185→  border-radius: 8px;
+   186→  border: 2px solid #060607;
+   187→}
+   188→::-webkit-scrollbar-thumb:hover {
+   189→  background: #3a3a42;
+   190→}
+   191→
+   192→/* ---------- Equalizer motif ----------
+   193→ * A pronounced, music-visualizer pulse. Each bar gets its own phase
+   194→ * (negative delay → bars are mid-motion immediately) and tempo via
+   195→ * `--eq-i`, so the group never moves in lockstep. */
+   196→@keyframes eq-bar {
+   197→  0%, 100% { transform: scaleY(0.22); }
+   198→  30% { transform: scaleY(1); }
+   199→  55% { transform: scaleY(0.42); }
+   200→  78% { transform: scaleY(0.88); }
+   201→}
+   202→
+   203→.eq-bar {
+   204→  transform-origin: bottom;
+   205→  animation: eq-bar 1s cubic-bezier(0.4, 0, 0.35, 1) infinite;
+   206→  animation-delay: calc(var(--eq-i, 0) * -0.217s);
+   207→  animation-duration: calc(0.86s + var(--eq-i, 0) * 0.113s);
+   208→}
+   209→
+   210→@media (prefers-reduced-motion: reduce) {
+   211→  .eq-bar {
+   212→    animation: none;
+   213→    /* staggered rest heights — still reads as an equalizer, just still */
+   214→    transform: scaleY(calc(0.45 + mod(var(--eq-i, 0), 3) * 0.18));
+   215→  }
+   216→}
+   217→
+   218→/* ---------- Marquee ---------- */
+   219→@keyframes marquee-x {
+   220→  from { transform: translateX(0); }
+   221→  to { transform: translateX(-50%); }
+   222→}
+   223→
+   224→.marquee-track {
+   225→  animation: marquee-x 36s linear infinite;
+   226→}
+   227→
+   228→@media (prefers-reduced-motion: reduce) {
+   229→  .marquee-track {
+   230→    animation: none;
+   231→  }
+   232→}
+   233→
+   234→/* ---------- Focus visibility ---------- */
+   235→:focus-visible {
+   236→  outline: 2px solid rgba(224, 57, 62, 0.75);
+   237→  outline-offset: 3px;
+   238→  border-radius: 4px;
+   239→}
+   240→
+   241→/* ---------- Scroll-driven reveals (pure CSS, no JS) ----------
+   242→ * Content is always rendered visible in the server HTML. Browsers that
+   243→ * support scroll-driven animations get a tasteful entrance effect tied to
+   244→ * the element's own view() timeline. Everything else — including sandboxed
+   245→ * iframes, stale JS, or failed hydration — still shows the content, so
+   246→ * sections can never get stuck black/empty.
+   247→ *
+   248→ * Tuned for an "ultra smooth" feel: a long expo-out glide (fast start,
+   249→ * gentle settle) spread over a wide entry range, so the reveal breathes
+   250→ * with the scroll instead of snapping.
+   251→ */
+   252→@keyframes reveal-enter {
+   253→  from {
+   254→    opacity: 0;
+   255→    transform: translateY(var(--reveal-y, 28px)) scale(var(--reveal-s, 0.985));
+   256→  }
+   257→  to {
+   258→    opacity: 1;
+   259→    transform: translateY(0) scale(1);
+   260→  }
+   261→}
+   262→
+   263→@supports (animation-timeline: view()) {
+   264→  @media (prefers-reduced-motion: no-preference) {
+   265→    .reveal {
+   266→      animation: reveal-enter both cubic-bezier(0.16, 1, 0.3, 1);
+   267→      animation-timeline: view();
+   268→      animation-range: entry 0% entry 88%;
+   269→      will-change: opacity, transform;
+   270→    }
+   271→
+   272→    /* Staggered groups: direct children reveal in sequence. */
+   273→    .reveal-stagger > * {
+   274→      animation: reveal-enter both cubic-bezier(0.16, 1, 0.3, 1);
+   275→      animation-timeline: view();
+   276→      animation-range: entry 0% entry 92%;
+   277→      will-change: opacity, transform;
+   278→    }
+   279→    .reveal-stagger > *:nth-child(2) { animation-range: entry 6% entry 94%; }
+   280→    .reveal-stagger > *:nth-child(3) { animation-range: entry 12% entry 96%; }
+   281→    .reveal-stagger > *:nth-child(4) { animation-range: entry 18% entry 98%; }
+   282→    .reveal-stagger > *:nth-child(5) { animation-range: entry 24% entry 100%; }
+   283→    .reveal-stagger > *:nth-child(6) { animation-range: entry 30% entry 100%; }
+   284→    .reveal-stagger > *:nth-child(n + 7) { animation-range: entry 36% entry 100%; }
+   285→  }
+   286→}
+   287→
+   288→@media (prefers-reduced-motion: reduce) {
+   289→  .reveal,
+   290→  .reveal-stagger > * {
+   291→    animation: none;
+   292→  }
+   293→}
+   294→
+   295→/* ---------- Hero entrance (pure CSS, no JS needed) ----------
+   296→ * Same expo-out glide as the scroll reveals — a long, weightless settle. */
+   297→@keyframes hero-rise-kf {
+   298→  from {
+   299→    opacity: 0;
+   300→    transform: translateY(var(--hero-y, 26px));
+   301→  }
+   302→  to {
+   303→    opacity: 1;
+   304→    transform: translateY(0);
+   305→  }
+   306→}
+   307→
+   308→@keyframes hero-rise-stage-kf {
+   309→  from {
+   310→    opacity: 0;
+   311→    transform: translateY(var(--hero-y, 70px)) scale(var(--hero-s, 0.94));
+   312→  }
+   313→  to {
+   314→    opacity: 1;
+   315→    transform: translateY(0) scale(1);
+   316→  }
+   317→}
+   318→
+   319→.hero-rise {
+   320→  animation: hero-rise-kf 1.05s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
+   321→}
+   322→
+   323→.hero-rise-stage {
+   324→  animation: hero-rise-stage-kf 1.35s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
+   325→}
+   326→
+   327→.hero-rise-rotate {
+   328→  --hero-s: 0.95;
+   329→}
+   330→
+   331→@media (prefers-reduced-motion: reduce) {
+   332→  .hero-rise,
+   333→  .hero-rise-stage {
+   334→    animation: none;
+   335→  }
+   336→}
+   337→
+   338→/* "Introducing Bitify" badge — spring pop-in, then a soft breathing glow */
+   339→@keyframes hero-badge-kf {
+   340→  0% {
+   341→    opacity: 0;
+   342→    transform: scale(0.72) translateY(10px);
+   343→  }
+   344→  55% {
+   345→    opacity: 1;
+   346→    transform: scale(1.06) translateY(-2px);
+   347→  }
+   348→  75% {
+   349→    transform: scale(0.985) translateY(0);
+   350→  }
+   351→  100% {
+   352→    opacity: 1;
+   353→    transform: scale(1) translateY(0);
+   354→  }
+   355→}
+   356→
+   357→@keyframes badge-glow-kf {
+   358→  0%, 100% {
+   359→    box-shadow: 0 0 0 0 rgba(224, 57, 62, 0);
+   360→  }
+   361→  50% {
+   362→    box-shadow: 0 0 22px 2px rgba(224, 57, 62, 0.28);
+   363→  }
+   364→}
+   365→
+   366→.hero-badge {
+   367→  animation:
+   368→    hero-badge-kf 0.9s cubic-bezier(0.34, 1.4, 0.44, 1) var(--d, 0s) both,
+   369→    badge-glow-kf 3.4s ease-in-out 1.1s infinite;
+   370→}
+   371→
+   372→@media (prefers-reduced-motion: reduce) {
+   373→  .hero-badge {
+   374→    animation: none;
+   375→  }
+   376→}
+   377→
+   378→/* ============================================================
+   379→   PhoneMockup — a phone body built in CSS around a real app
+   380→   screenshot. Everything derives from `--pw` (phone width), so
+   381→   one component scales cleanly from mobile to desktop.
+   382→   ============================================================ */
+   383→.phone-mockup {
+   384→  position: relative;
+   385→  width: var(--pw, 300px);
+   386→  aspect-ratio: 1 / 2;
+   387→  box-sizing: border-box;
+   388→  border-radius: calc(var(--pw, 300px) * 0.125);
+   389→  padding: calc(var(--pw, 300px) * 0.024);
+   390→  /* brushed titanium rail catching the hero light */
+   391→  background: linear-gradient(
+   392→    157deg,
+   393→    #4a4a53 0%,
+   394→    #26262d 15%,
+   395→    #15151b 38%,
+   396→    #0e0e12 56%,
+   397→    #1d1d24 78%,
+   398→    #36363f 93%,
+   399→    #4c4c57 100%
+   400→  );
+   401→  box-shadow:
+   402→    inset 0 0 0 1px rgba(255, 255, 255, 0.11),
+   403→    inset 0 0 0 2.5px rgba(0, 0, 0, 0.62),
+   404→    0 2px 3px rgba(255, 255, 255, 0.045),
+   405→    0 38px 80px -24px rgba(0, 0, 0, 0.85),
+   406→    0 14px 34px -10px rgba(0, 0, 0, 0.6);
+   407→}
+   408→
+   409→.pm-screen {
+   410→  position: relative;
+   411→  width: 100%;
+   412→  height: 100%;
+   413→  border-radius: calc(var(--pw, 300px) * 0.102);
+   414→  overflow: hidden;
+   415→  background: #000;
+   416→  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.9);
+   417→  isolation: isolate;
+   418→}
+   419→
+   420→/* faint glass reflection sweep */
+   421→.pm-glare {
+   422→  position: absolute;
+   423→  inset: 0;
+   424→  z-index: 2;
+   425→  pointer-events: none;
+   426→  background: linear-gradient(
+   427→    113deg,
+   428→    transparent 30%,
+   429→    rgba(255, 255, 255, 0.05) 42%,
+   430→    rgba(255, 255, 255, 0.012) 50%,
+   431→    transparent 58%
+   432→  );
+   433→}
+   434→
+   435→/* punch-hole camera */
+   436→.pm-camera {
+   437→  position: absolute;
+   438→  top: calc(var(--pw, 300px) * 0.026);
+   439→  left: 50%;
+   440→  transform: translateX(-50%);
+   441→  width: calc(var(--pw, 300px) * 0.034);
+   442→  height: calc(var(--pw, 300px) * 0.034);
+   443→  border-radius: 9999px;
+   444→  background: radial-gradient(circle at 38% 35%, #2e313a 0%, #0a0a0d 65%);
+   445→  box-shadow:
+   446→    0 0 0 1.5px rgba(255, 255, 255, 0.05),
+   447→    inset 0 1px 2px rgba(255, 255, 255, 0.14);
+   448→  z-index: 3;
+   449→}
+   450→
+   451→/* physical side keys */
+   452→.pm-key {
+   453→  position: absolute;
+   454→  border-radius: 2px;
+   455→  background: linear-gradient(180deg, #40404a, #191920);
+   456→  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+   457→}
+   458→.pm-key-power {
+   459→  right: calc(var(--pw, 300px) * -0.011);
+   460→  top: 28%;
+   461→  width: calc(var(--pw, 300px) * 0.014);
+   462→  height: calc(var(--pw, 300px) * 0.11);
+   463→}
+   464→.pm-key-vol {
+   465→  left: calc(var(--pw, 300px) * -0.011);
+   466→  top: 21%;
+   467→  width: calc(var(--pw, 300px) * 0.014);
+   468→  height: calc(var(--pw, 300px) * 0.18);
+   469→}
+   470→
+   471→/* ============================================================
+   472→   DeviceCoverflow — perspective 3D coverflow (see component
+   473→   for the positioning model). Spacing/depth/size are CSS vars
+   474→   so the whole composition retunes per breakpoint without JS.
+   475→   ============================================================ */
+   476→.cf-root {
+   477→  width: 100%;
+   478→}
+   479→
+   480→.cf-stage {
+   481→  --pw: clamp(220px, 24vw, 300px);
+   482→  --cf-gap: calc(var(--pw) * 0.66); /* keep GAP_FACTOR in device-coverflow.tsx in sync */
+   483→  --cf-depth: 150px;
+   484→  --cf-persp: 1500px;
+   485→  --cf-dur: 750ms;
+   486→  --cf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+   487→  position: relative;
+   488→  width: 100%;
+   489→  height: calc(var(--pw) * 2.32);
+   490→  perspective: var(--cf-persp);
+   491→  perspective-origin: 50% 44%;
+   492→  touch-action: pan-y; /* horizontal swipes steer the carousel, vertical scrolls the page */
+   493→  cursor: grab;
+   494→  user-select: none;
+   495→  -webkit-user-select: none;
+   496→  outline: none;
+   497→}
+   498→.cf-stage:focus-visible {
+   499→  outline: 2px solid rgba(224, 57, 62, 0.7);
+   500→  outline-offset: 10px;
+   501→  border-radius: 28px;
+   502→}
+   503→.cf-stage.is-dragging {
+   504→  cursor: grabbing;
+   505→}
+   506→
+   507→.cf-track {
+   508→  position: absolute;
+   509→  inset: 0;
+   510→  z-index: 1;
+   511→  transform-style: preserve-3d;
+   512→}
+   513→
+   514→.cf-slide {
+   515→  position: absolute;
+   516→  inset: 0;
+   517→  display: flex;
+   518→  align-items: center;
+   519→  justify-content: center;
+   520→  pointer-events: none; /* only the phone itself is a drag/click target */
+   521→  transition:
+   522→    transform var(--cf-dur) var(--cf-ease),
+   523→    opacity calc(var(--cf-dur) * 0.72) cubic-bezier(0.4, 0, 0.2, 1);
+   524→  will-change: transform, opacity;
+   525→}
+   526→.cf-slide .cf-enter {
+   527→  pointer-events: auto;
+   528→}
+   529→.cf-stage.is-dragging .cf-slide {
+   530→  transition: none; /* 1 : 1 finger tracking */
+   531→}
+   532→
+   533→/* per-slide entrance — time-based fallback (plays on mount). Inside the
+   534→ * @supports (animation-timeline: view()) block below, this is retuned to a
+   535→ * scroll-scrubbed, staggered entrance so the carousel settles in as the
+   536→ * visitor scrolls to it. */
+   537→@keyframes cf-enter-kf {
+   538→  from {
+   539→    opacity: 0;
+   540→    transform: translateY(46px) scale(0.92);
+   541→  }
+   542→  to {
+   543→    opacity: 1;
+   544→    transform: translateY(0) scale(1);
+   545→  }
+   546→}
+   547→.cf-enter {
+   548→  animation: cf-enter-kf 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+   549→}
+   550→
+   551→/* scroll-scrubbed staggered entrance for the coverflow slides */
+   552→@supports (animation-timeline: view()) {
+   553→  @media (prefers-reduced-motion: no-preference) {
+   554→    .cf-slide .cf-enter {
+   555→      animation: cf-enter-kf both cubic-bezier(0.16, 1, 0.3, 1);
+   556→      animation-timeline: view();
+   557→      animation-range: entry 0% entry 84%;
+   558→    }
+   559→    .cf-track > .cf-slide:nth-child(2) .cf-enter { animation-range: entry 5% entry 88%; }
+   560→    .cf-track > .cf-slide:nth-child(3) .cf-enter { animation-range: entry 10% entry 92%; }
+   561→    .cf-track > .cf-slide:nth-child(4) .cf-enter { animation-range: entry 15% entry 96%; }
+   562→    .cf-track > .cf-slide:nth-child(5) .cf-enter { animation-range: entry 20% entry 100%; }
+   563→    .cf-track > .cf-slide:nth-child(6) .cf-enter { animation-range: entry 25% entry 100%; }
+   564→    .cf-track > .cf-slide:nth-child(7) .cf-enter { animation-range: entry 30% entry 100%; }
+   565→  }
+   566→}
+   567→
+   568→/* ambient light behind the devices */
+   569→@keyframes cf-breathe-kf {
+   570→  0%, 100% { opacity: 0.72; }
+   571→  50% { opacity: 1; }
+   572→}
+   573→.cf-glow {
+   574→  position: absolute;
+   575→  left: 50%;
+   576→  top: 44%;
+   577→  width: min(1150px, 130%);
+   578→  height: 78%;
+   579→  transform: translate(-50%, -50%);
+   580→  background:
+   581→    radial-gradient(ellipse 44% 56% at 50% 50%, rgba(224, 57, 62, 0.21), transparent 68%),
+   582→    radial-gradient(ellipse 26% 40% at 30% 64%, rgba(139, 92, 246, 0.10), transparent 72%);
+   583→  filter: blur(8px);
+   584→  animation: cf-breathe-kf 7s ease-in-out infinite;
+   585→  pointer-events: none;
+   586→}
+   587→.cf-floor {
+   588→  position: absolute;
+   589→  left: 50%;
+   590→  top: 84%;
+   591→  width: 74%;
+   592→  height: 20%;
+   593→  transform: translate(-50%, -50%);
+   594→  background: radial-gradient(
+   595→    ellipse at center,
+   596→    rgba(224, 57, 62, 0.17),
+   597→    rgba(224, 57, 62, 0.05) 46%,
+   598→    transparent 72%
+   599→  );
+   600→  filter: blur(16px);
+   601→  pointer-events: none;
+   602→}
+   603→
+   604→/* circular navigation buttons */
+   605→.cf-nav {
+   606→  position: absolute;
+   607→  top: 50%;
+   608→  z-index: 50;
+   609→  display: grid;
+   610→  place-items: center;
+   611→  width: 54px;
+   612→  height: 54px;
+   613→  border-radius: 9999px;
+   614→  color: var(--warm-white);
+   615→  background: rgba(13, 13, 17, 0.55);
+   616→  border: 1px solid rgba(255, 255, 255, 0.14);
+   617→  backdrop-filter: blur(12px);
+   618→  -webkit-backdrop-filter: blur(12px);
+   619→  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.75);
+   620→  cursor: pointer;
+   621→  transform: translateY(-50%);
+   622→  transition:
+   623→    border-color 0.3s ease,
+   624→    background-color 0.3s ease,
+   625→    color 0.3s ease,
+   626→    box-shadow 0.3s ease,
+   627→    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+   628→}
+   629→.cf-nav:hover {
+   630→  border-color: rgba(224, 57, 62, 0.72);
+   631→  background: rgba(224, 57, 62, 0.15);
+   632→  color: var(--crimson-bright);
+   633→  box-shadow: 0 14px 40px -8px rgba(224, 57, 62, 0.5);
+   634→  transform: translateY(-50%) scale(1.07);
+   635→}
+   636→.cf-nav:active {
+   637→  transform: translateY(-50%) scale(0.96);
+   638→}
+   639→.cf-nav:focus-visible {
+   640→  outline: 2px solid rgba(224, 57, 62, 0.85);
+   641→  outline-offset: 3px;
+   642→}
+   643→.cf-nav svg {
+   644→  width: 22px;
+   645→  height: 22px;
+   646→}
+   647→.cf-nav-prev {
+   648→  left: max(10px, calc(50% - var(--pw) * 1.95));
+   649→}
+   650→.cf-nav-next {
+   651→  right: max(10px, calc(50% - var(--pw) * 1.95));
+   652→}
+   653→
+   654→/* label + dots under the stage */
+   655→.cf-meta {
+   656→  margin-top: 8px;
+   657→  display: flex;
+   658→  flex-direction: column;
+   659→  align-items: center;
+   660→  gap: 14px;
+   661→}
+   662→@media (max-width: 639px) {
+   663→  .cf-meta { margin-top: 4px; }
+   664→}
+   665→.cf-label {
+   666→  display: flex;
+   667→  align-items: baseline;
+   668→  gap: 16px;
+   669→  font-family: var(--font-geist-mono), monospace;
+   670→  font-size: 0.6875rem;
+   671→  letter-spacing: 0.3em;
+   672→  text-transform: uppercase;
+   673→}
+   674→@keyframes cf-label-in-kf {
+   675→  from {
+   676→    opacity: 0;
+   677→    transform: translateY(7px);
+   678→  }
+   679→  to {
+   680→    opacity: 1;
+   681→    transform: translateY(0);
+   682→  }
+   683→}
+   684→.cf-label-swap {
+   685→  display: inline-block;
+   686→  color: var(--warm-white);
+   687→  animation: cf-label-in-kf 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+   688→}
+   689→.cf-count {
+   690→  color: rgba(244, 241, 236, 0.32);
+   691→  letter-spacing: 0.18em;
+   692→}
+   693→.cf-dots {
+   694→  display: flex;
+   695→  align-items: center;
+   696→  gap: 8px;
+   697→}
+   698→.cf-dot {
+   699→  width: 7px;
+   700→  height: 7px;
+   701→  padding: 0;
+   702→  border: none;
+   703→  border-radius: 9999px;
+   704→  background: rgba(244, 241, 236, 0.18);
+   705→  cursor: pointer;
+   706→  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+   707→}
+   708→.cf-dot:hover {
+   709→  background: rgba(244, 241, 236, 0.5);
+   710→}
+   711→.cf-dot.is-active {
+   712→  width: 24px;
+   713→  background: var(--crimson);
+   714→  box-shadow: 0 0 14px rgba(224, 57, 62, 0.65);
+   715→}
+   716→.cf-dot:focus-visible {
+   717→  outline: 2px solid rgba(224, 57, 62, 0.8);
+   718→  outline-offset: 3px;
+   719→}
+   720→
+   721→/* ---- responsive retuning ---- */
+   722→@media (max-width: 1100px) {
+   723→  .cf-stage {
+   724→    --pw: min(44vw, 252px);
+   725→    --cf-depth: 118px;
+   726→    --cf-persp: 1200px;
+   727→  }
+   728→  .cf-nav-prev { left: max(8px, calc(50% - var(--pw) * 2.1)); }
+   729→  .cf-nav-next { right: max(8px, calc(50% - var(--pw) * 2.1)); }
+   730→}
+   731→
+   732→@media (max-width: 639px) {
+   733→  .cf-stage {
+   734→    --pw: min(48vw, 220px);
+   735→    --cf-gap: calc(var(--pw) * 0.82); /* neighbours peek from the screen edges */
+   736→    --cf-depth: 88px;
+   737→    --cf-persp: 1000px;
+   738→    height: calc(var(--pw) * 2.34);
+   739→  }
+   740→  .cf-nav {
+   741→    width: 44px;
+   742→    height: 44px;
+   743→  }
+   744→  .cf-nav svg {
+   745→    width: 19px;
+   746→    height: 19px;
+   747→  }
+   748→  .cf-nav-prev { left: 5px; }
+   749→  .cf-nav-next { right: 5px; }
+   750→  .cf-label { letter-spacing: 0.24em; }
+   751→}
+   752→
+   753→/* ---- reduced motion: simpler, near-instant repositioning ---- */
+   754→@media (prefers-reduced-motion: reduce) {
+   755→  .cf-slide {
+   756→    transition: transform 140ms ease, opacity 140ms ease;
+   757→  }
+   758→  .cf-enter,
+   759→  .cf-glow,
+   760→  .cf-label-swap {
+   761→    animation: none;
+   762→  }
+   763→  .cf-stage {
+   764→    cursor: default;
+   765→  }
+   766→}
+   767→
+   768→/* ============================================================
+   769→   Ambilight — soft rear lights behind device frames
+   770→   ------------------------------------------------------------
+   771→   Every device "sits" in front of a light source: a wide
+   772→   blurred halo plus a tighter edge-glow strip that hugs the
+   773→   frame silhouette. Both breathe very slowly (opacity only,
+   774→   GPU-cheap) so the hardware feels switched on and alive.
+   775→   ============================================================ */
+   776→@keyframes amb-breathe-kf {
+   777→  0%, 100% { opacity: 0.7; }
+   778→  50% { opacity: 1; }
+   779→}
+   780→
+   781→/* ---- MonitorFrame rear lights ---- */
+   782→.mf-halo {
+   783→  position: absolute;
+   784→  inset: -9% -8% -18% -8%;
+   785→  z-index: -1;
+   786→  filter: blur(26px);
+   787→  pointer-events: none;
+   788→  background:
+   789→    /* dark backing first (on top, inner) — separates the glow from
+   790→     whatever busy content sits behind the monitor (e.g. the hero TV) */
+   791→    radial-gradient(ellipse 50% 42% at 50% 44%, rgba(3, 3, 6, 0.66), transparent 68%),
+   792→    radial-gradient(ellipse 58% 46% at 50% 42%, rgba(224, 57, 62, 0.30), transparent 70%),
+   793→    radial-gradient(ellipse 24% 20% at 16% 22%, rgba(139, 92, 246, 0.13), transparent 72%),
+   794→    radial-gradient(ellipse 22% 18% at 84% 26%, rgba(224, 57, 62, 0.16), transparent 74%);
+   795→  animation: amb-breathe-kf 7.5s ease-in-out infinite;
+   796→}
+   797→.mf-edge {
+   798→  position: absolute;
+   799→  inset: 1.5% 0.5% 4.5% 0.5%;
+   800→  z-index: -1;
+   801→  border-radius: 22px;
+   802→  pointer-events: none;
+   803→  box-shadow:
+   804→    0 0 0 1px rgba(255, 255, 255, 0.05),
+   805→    0 0 36px 12px rgba(3, 3, 6, 0.72),
+   806→    0 0 64px 14px rgba(224, 57, 62, 0.30);
+   807→}
+   808→.mf-led {
+   809→  width: 4px;
+   810→  height: 4px;
+   811→  border-radius: 9999px;
+   812→  background: var(--crimson-bright);
+   813→  animation: mf-led-kf 3.4s ease-in-out infinite;
+   814→}
+   815→@keyframes mf-led-kf {
+   816→  0%, 100% { box-shadow: 0 0 4px 1px rgba(224, 57, 62, 0.45); opacity: 0.85; }
+   817→  50% { box-shadow: 0 0 11px 2.5px rgba(224, 57, 62, 0.95); opacity: 1; }
+   818→}
+   819→.mf-neck {
+   820→  width: 58px;
+   821→  height: 58px;
+   822→  clip-path: polygon(27% 0, 73% 0, 100% 100%, 0 100%);
+   823→  background: linear-gradient(180deg, #292933 0%, #1b1b23 55%, #121218 100%);
+   824→  box-shadow:
+   825→    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+   826→    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+   827→}
+   828→.mf-base {
+   829→  width: 232px;
+   830→  height: 8px;
+   831→  margin-top: -1px;
+   832→  border-radius: 9999px;
+   833→  background: linear-gradient(180deg, #34343e 0%, #1b1b23 60%, #111117 100%);
+   834→  box-shadow:
+   835→    0 10px 34px rgba(0, 0, 0, 0.8),
+   836→    0 0 20px rgba(224, 57, 62, 0.16),
+   837→    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+   838→}
+   839→/* desk under the monitor: dark contact shadow + crimson light pool */
+   840→.mf-floor {
+   841→  position: absolute;
+   842→  left: 50%;
+   843→  top: 100%;
+   844→  margin-top: 66px;
+   845→  width: 94%;
+   846→  height: 54px;
+   847→  transform: translateX(-50%);
+   848→  pointer-events: none;
+   849→  background:
+   850→    radial-gradient(ellipse 44% 46% at 50% 42%, rgba(0, 0, 0, 0.6), transparent 70%),
+   851→    radial-gradient(ellipse at center, rgba(224, 57, 62, 0.15), rgba(224, 57, 62, 0.05) 46%, transparent 68%);
+   852→  filter: blur(10px);
+   853→}
+   854→
+   855→/* ---- shared Ambilight for TV cutouts (real photos with their own bezel) ---- */
+   856→.amb-halo {
+   857→  position: absolute;
+   858→  inset: -8% -6% -12% -6%;
+   859→  z-index: -1;
+   860→  filter: blur(24px);
+   861→  pointer-events: none;
+   862→  background:
+   863→    radial-gradient(ellipse 56% 44% at 50% 46%, rgba(224, 57, 62, 0.30), transparent 70%),
+   864→    radial-gradient(ellipse 22% 18% at 15% 26%, rgba(139, 92, 246, 0.14), transparent 72%),
+   865→    radial-gradient(ellipse 20% 16% at 85% 30%, rgba(224, 57, 62, 0.16), transparent 74%);
+   866→  animation: amb-breathe-kf 7s ease-in-out infinite;
+   867→}
+   868→.amb-edge {
+   869→  position: absolute;
+   870→  inset: 3% 1% 7% 1%;
+   871→  z-index: -1;
+   872→  border-radius: 18px;
+   873→  pointer-events: none;
+   874→  box-shadow:
+   875→    0 0 44px 6px rgba(224, 57, 62, 0.24),
+   876→    0 0 130px 34px rgba(224, 57, 62, 0.10);
+   877→}
+   878→
+   879→@media (prefers-reduced-motion: reduce) {
+   880→  .mf-halo,
+   881→  .mf-led,
+   882→  .amb-halo {
+   883→    animation: none;
+   884→  }
+   885→}
+   886→
+   887→/* ============================================================
+   888→   Hero — living atmosphere
+   889→   Slow-drifting aurora blobs + soft spotlight cones crossing
+   890→   behind the device stage. Transform/opacity only (GPU).
+   891→   ============================================================ */
+   892→.hero-aurora {
+   893→  position: absolute;
+   894→  width: 46vw;
+   895→  height: 46vw;
+   896→  min-width: 480px;
+   897→  min-height: 480px;
+   898→  border-radius: 9999px;
+   899→  filter: blur(90px);
+   900→  pointer-events: none;
+   901→  will-change: transform, opacity;
+   902→}
+   903→.hero-aurora-a {
+   904→  left: -12%;
+   905→  top: -18%;
+   906→  background: radial-gradient(circle, rgba(224, 57, 62, 0.14), transparent 62%);
+   907→  animation: aurora-a-kf 17s ease-in-out infinite;
+   908→}
+   909→.hero-aurora-b {
+   910→  right: -14%;
+   911→  top: 4%;
+   912→  background: radial-gradient(circle, rgba(139, 92, 246, 0.10), transparent 64%);
+   913→  animation: aurora-b-kf 21s ease-in-out infinite;
+   914→}
+   915→@keyframes aurora-a-kf {
+   916→  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+   917→  50% { transform: translate3d(6%, 5%, 0) scale(1.12); opacity: 1; }
+   918→}
+   919→@keyframes aurora-b-kf {
+   920→  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.7; }
+   921→  50% { transform: translate3d(-5%, 7%, 0) scale(0.94); opacity: 1; }
+   922→}
+   923→
+   924→.hero-spot {
+   925→  position: absolute;
+   926→  top: -6%;
+   927→  width: min(30vw, 420px);
+   928→  height: 80%;
+   929→  pointer-events: none;
+   930→  filter: blur(26px);
+   931→  opacity: 0.55;
+   932→  transform-origin: 50% 0%;
+   933→  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+   934→}
+   935→.hero-spot-l {
+   936→  left: 5%;
+   937→  background: linear-gradient(180deg, rgba(224, 57, 62, 0.13), transparent 78%);
+   938→  animation: spot-sway-kf 11s ease-in-out infinite;
+   939→}
+   940→.hero-spot-r {
+   941→  right: 5%;
+   942→  background: linear-gradient(180deg, rgba(139, 92, 246, 0.10), transparent 76%);
+   943→  animation: spot-sway-kf 14s ease-in-out infinite reverse;
+   944→}
+   945→@keyframes spot-sway-kf {
+   946→  0%, 100% { transform: rotate(-2.4deg); }
+   947→  50% { transform: rotate(2deg); }
+   948→}
+   949→
+   950→/* warm breathing glow that hugs the hero phone — dark backing so the
+   951→   crimson rim reads even over the bright TV artwork behind it */
+   952→.phone-glow {
+   953→  position: absolute;
+   954→  inset: -16% -28%;
+   955→  z-index: -1;
+   956→  filter: blur(22px);
+   957→  pointer-events: none;
+   958→  background:
+   959→    radial-gradient(ellipse 46% 40% at 50% 52%, rgba(3, 3, 6, 0.6), transparent 70%),
+   960→    radial-gradient(
+   961→      ellipse 60% 50% at 50% 52%,
+   962→      rgba(224, 57, 62, 0.26),
+   963→      rgba(139, 92, 246, 0.06) 55%,
+   964→      transparent 72%
+   965→    );
+   966→  animation: amb-breathe-kf 5.5s ease-in-out infinite;
+   967→}
+   968→
+   969→@media (prefers-reduced-motion: reduce) {
+   970→  .hero-aurora-a,
+   971→  .hero-aurora-b,
+   972→  .hero-spot-l,
+   973→  .hero-spot-r,
+   974→  .phone-glow {
+   975→    animation: none;
+   976→  }
+   977→}
+   978→
+   979→/* ============================================================
+   980→   Coverflow — front-phone spotlight
+   981→   A halo of light sits behind each phone; its strength is the
+   982→   slide's `--halo` (1 at centre, fading with |distance|), so
+   983→   the front device is clearly the star while neighbours slip
+   984→   into shadow. Side phones are also dimmed (brightness/
+   985→   saturate) to deepen the stage lighting.
+   986→   ============================================================ */
+   987→.cf-halo {
+   988→  position: absolute;
+   989→  left: 50%;
+   990→  top: 50%;
+   991→  width: calc(var(--pw) * 2.0);
+   992→  height: calc(var(--pw) * 2.75);
+   993→  transform: translate(-50%, -50%);
+   994→  pointer-events: none;
+   995→  background:
+   996→    radial-gradient(ellipse 50% 44% at 50% 48%, rgba(224, 57, 62, 0.42), rgba(224, 57, 62, 0.12) 58%, transparent 74%),
+   997→    radial-gradient(ellipse 36% 22% at 50% 82%, rgba(139, 92, 246, 0.13), transparent 72%);
+   998→  filter: blur(18px);
+   999→  opacity: var(--halo, 0);
+  1000→  transition: opacity calc(var(--cf-dur) * 0.85) cubic-bezier(0.4, 0, 0.2, 1);
+  1001→  will-change: opacity;
+  1002→}
+  1003→.cf-slide .cf-enter {
+  1004→  position: relative;
+  1005→  z-index: 1;
+  1006→  /* stage lighting: the front phone at full punch, neighbours dimmed */
+  1007→  filter: brightness(calc(0.78 + var(--halo, 0) * 0.22))
+  1008→    saturate(calc(0.85 + var(--halo, 0) * 0.15));
+  1009→  transition:
+  1010→    filter var(--cf-dur) var(--cf-ease),
+  1011→    opacity var(--cf-dur) var(--cf-ease),
+  1012→    transform var(--cf-dur) var(--cf-ease);
+  1013→}
+  1014→.cf-stage.is-dragging .cf-slide .cf-enter,
+  1015→.cf-stage.is-dragging .cf-halo {
+  1016→  transition: none; /* 1 : 1 finger tracking */
+  1017→}
+  1018→
+  1019→/* ---- auto-switch control ---- */
+  1020→.cf-autoplay {
+  1021→  display: grid;
+  1022→  place-items: center;
+  1023→  width: 30px;
+  1024→  height: 30px;
+  1025→  padding: 0;
+  1026→  border: 1px solid rgba(255, 255, 255, 0.14);
+  1027→  border-radius: 9999px;
+  1028→  background: rgba(255, 255, 255, 0.04);
+  1029→  color: rgba(244, 241, 236, 0.55);
+  1030→  cursor: pointer;
+  1031→  transition:
+  1032→    border-color 0.3s ease,
+  1033→    color 0.3s ease,
+  1034→    background-color 0.3s ease,
+  1035→    box-shadow 0.3s ease,
+  1036→    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  1037→}
+  1038→.cf-autoplay:hover {
+  1039→  border-color: rgba(224, 57, 62, 0.65);
+  1040→  background: rgba(224, 57, 62, 0.12);
+  1041→  color: var(--crimson-bright);
+  1042→  box-shadow: 0 6px 22px -6px rgba(224, 57, 62, 0.55);
+  1043→  transform: scale(1.08);
+  1044→}
+  1045→.cf-autoplay:active {
+  1046→  transform: scale(0.94);
+  1047→}
+  1048→.cf-autoplay:focus-visible {
+  1049→  outline: 2px solid rgba(224, 57, 62, 0.85);
+  1050→  outline-offset: 3px;
+  1051→}
+  1052→.cf-autoplay svg {
+  1053→  width: 11px;
+  1054→  height: 11px;
+  1055→}
+  1056→.cf-controls {
+  1057→  display: flex;
+  1058→  align-items: center;
+  1059→  gap: 16px;
+  1060→}
+  1061→.cf-controls-divider {
+  1062→  width: 1px;
+  1063→  height: 14px;
+  1064→  background: rgba(244, 241, 236, 0.14);
+  1065→}
+  1066→
+  1067→@media (prefers-reduced-motion: reduce) {
+  1068→  .cf-halo {
+  1069→    transition: opacity 140ms ease;
+  1070→  }
+  1071→  .cf-slide .cf-enter {
+  1072→    filter: brightness(calc(0.84 + var(--halo, 0) * 0.16));
+  1073→    transition: filter 140ms ease, opacity 140ms ease, transform 140ms ease;
+  1074→  }
+  1075→}
+  1076→
+  1077→/* cache-refresh 1793520185 */
+  1078→

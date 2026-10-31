@@ -50,8 +50,8 @@ export function Navbar() {
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-500",
           scrolled
-            ? "border-b border-white/[0.06] bg-[#060607]/85 backdrop-blur-xl"
-            : "border-b border-transparent bg-transparent"
+            ? "border-b border-white/[0.08] bg-[#060607]/90 shadow-[0_12px_44px_-24px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+            : "border-b border-white/[0.05] bg-[#060607]/55 backdrop-blur-md"
         )}
       >
         <nav
@@ -64,7 +64,7 @@ export function Navbar() {
             className="group relative rounded-md"
             onClick={() => setOpen(false)}
           >
-            <BrandLogo priority className="h-8 sm:h-9" />
+            <BrandLogo priority className="h-12 sm:h-[64px]" />
           </a>
 
           {/* desktop links */}
