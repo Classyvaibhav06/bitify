@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c0c0f"/>
+      <stop offset="1" stop-color="#050506"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f05055"/>
+      <stop offset="1" stop-color="#c92832"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- headband -->
+  <path d="M 17 38 L 17 33 A 15 15 0 0 1 47 33 L 47 38"
+        fill="none" stroke="#f4f1ec" stroke-width="5" stroke-linecap="round"/>
+  <!-- ear cups -->
+  <rect x="12" y="36" width="10" height="17" rx="5" fill="#f4f1ec"/>
+  <rect x="42" y="36" width="10" height="17" rx="5" fill="#f4f1ec"/>
+  <rect x="15" y="40" width="4" height="9" rx="2" fill="#0c0c0f"/>
+  <rect x="45" y="40" width="4" height="9" rx="2" fill="#0c0c0f"/>
+  <!-- lightning bolt -->
+  <path d="M 34 20 L 26 35 L 32 35 L 28 48 L 40 31 L 33 31 Z" fill="url(#bolt)"/>
+</svg>
