@@ -1,27 +1,28 @@
 "use client";
 
 import { useRef, type CSSProperties } from "react";
-import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, MonitorSmartphone } from "lucide-react";
 import { Equalizer } from "./equalizer";
-import { LaptopMockup } from "./devices/laptop-mockup";
+import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
 import { DeviceShotImage } from "./devices/device-shot";
 import { PhoneMockup } from "./devices/phone-mockup";
-import { MOBILE_SCREENS, SCREENSHOTS, TV_SHOTS } from "@/lib/site-config";
+import { MOBILE_SCREENS, TV_SHOTS } from "@/lib/site-config";
 
 /**
  * Hero — a cinematic product shoot in CSS.
  *
  * One near-black stage, three real devices and a restrained lighting
- * rig. The laptop is the star of the composition: a photoreal
- * chassis front-left, large and clearly readable. The TV sits behind
- * it, centered, adding depth without competing; the phone stands to
- * the right at a believable size. The whole rig fades in on load
- * (`.hero-fade`); only the device backlights breathe afterwards, and
- * three parallax layers drift gently on scroll. Entrance animations
- * stay pure CSS (`.hero-rise*`) so the hero renders before
- * hydration; framer-motion only adds the parallax and idle floats.
+ * rig. The laptop is the star of the composition: a photoreal,
+ * camera-projected studio render (Gemini-authored chassis carrying the
+ * real Bitify desktop screenshot) placed front-right, angled to face
+ * the headline. The TV sits behind it, slightly left of center, adding
+ * depth without competing; the phone stands to the left at a
+ * believable size. The whole rig fades in on load (`.hero-fade`); only
+ * the device backlights breathe afterwards, and three parallax layers
+ * drift gently on scroll. Entrance animations stay pure CSS
+ * (`.hero-rise*`) so the hero renders before hydration; framer-motion
+ * only adds the parallax and idle floats.
  */
 export function Hero() {
   const reduce = useReducedMotion();
@@ -114,8 +115,8 @@ export function Hero() {
           </a>
         </div>
 
-        {/* ---- device stage — the laptop leads, the TV adds depth,
-              the phone stands clear to the right ---- */}
+        {/* ---- device stage — the laptop leads from the right, the TV
+              adds depth behind-left, the phone stands clear to the left ---- */}
         <div
           ref={stageRef}
           className="relative mt-12 h-[440px] w-full max-w-[1040px] sm:h-[520px] lg:h-[550px]"
@@ -124,7 +125,7 @@ export function Hero() {
           {/* TV — real photo cutout, rearmost layer, lit from behind */}
           <motion.div
             style={reduce ? undefined : { y: tvY }}
-            className="absolute left-1/2 top-0 w-[78%] -translate-x-1/2 sm:w-[64%] lg:w-[62%]"
+            className="absolute left-[42%] top-0 w-[80%] -translate-x-1/2 sm:w-[64%] lg:w-[58%]"
           >
             <div
               className="hero-rise-stage relative"
@@ -146,10 +147,12 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* laptop — the hero device: photoreal chassis, front-left */}
+          {/* laptop — the hero device: photoreal studio render, front-right,
+              angled to face the headline. The projected laptop fills ~66% of
+              the wrapper's width and ~80% of its height, centered. */}
           <motion.div
             style={reduce ? undefined : { y: laptopY }}
-            className="absolute bottom-0 left-[-2%] w-[76%] sm:left-[1%] sm:w-[56%] lg:left-[1%] lg:w-[52%]"
+            className="pointer-events-none absolute bottom-[-6%] right-[-8%] w-[100%] sm:bottom-[-6%] sm:right-[-4%] sm:w-[88%] lg:bottom-[-8%] lg:right-[-2%] lg:w-[84%]"
           >
             <div
               className="hero-rise-stage"
@@ -158,25 +161,20 @@ export function Hero() {
               <motion.div
                 animate={reduce ? undefined : { y: [0, -4, 0] }}
                 transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+                className="relative"
               >
-                <LaptopMockup>
-                  <Image
-                    src={SCREENSHOTS.desktop.hero}
-                    alt="Bitify Music desktop application — home view with library and player"
-                    fill
-                    priority
-                    sizes="(max-width: 640px) 76vw, 52vw"
-                    className="object-cover"
-                  />
-                </LaptopMockup>
+                {/* ambient pool — grounds the render, separates it
+                    from the TV artwork behind */}
+                <div aria-hidden className="hero-laptop-amb" />
+                <StudioLaptopStage className="w-full" />
               </motion.div>
             </div>
           </motion.div>
 
-          {/* phone — front-right, realistic size, clear of the laptop */}
+          {/* phone — front-left, realistic size, clear of the laptop */}
           <motion.div
             style={reduce ? undefined : { y: phoneY }}
-            className="absolute bottom-[1%] right-[1%] sm:bottom-[2%] sm:right-[5%] lg:bottom-[2%] lg:right-[4%]"
+            className="absolute bottom-[1%] left-[1%] sm:bottom-[2%] sm:left-[5%] lg:bottom-[2%] lg:left-[4%]"
           >
             <div
               className="hero-rise-stage hero-rise-rotate relative"
@@ -185,7 +183,7 @@ export function Hero() {
               <motion.div
                 animate={reduce ? undefined : { y: [0, -8, 0] }}
                 transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-                className="rotate-[3deg] [--pw:100px] sm:[--pw:160px] lg:[--pw:190px]"
+                className="rotate-[-3deg] [--pw:100px] sm:[--pw:160px] lg:[--pw:190px]"
               >
                 <div className="relative">
                   {/* controlled red glow hugging the phone */}

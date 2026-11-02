@@ -859,158 +859,6 @@ html {
   filter: blur(10px);
 }
 
-/* ============================================================
-   LaptopMockup — photoreal lid + minimal Apple-style base
-   ------------------------------------------------------------
-   The lid is a generated studio-shot chassis (transparent
-   cutout); the app screenshot sits in its measured screen
-   rect, so the panel ratio matches the shot exactly — no
-   crop, no distortion. Below it, a restrained CSS base:
-   hinge recess, thin deck sliver with key-row whispers and
-   screen-light spill, slim bright front lip with the thumb
-   notch. Proportions follow real MacBook front views.
-   ============================================================ */
-.lt-lid {
-  position: relative;
-  /* silhouette shadow follows the cutout alpha */
-  filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.55));
-}
-.lt-lid img {
-  border-radius: 14px;
-}
-/* the screenshot window — pixel-mapped to the chassis screen */
-.lt-screen {
-  position: absolute;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #0b0b0d;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-.lt-glass {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(112deg, rgba(255, 255, 255, 0.085) 0%, transparent 26%),
-    radial-gradient(ellipse 130% 100% at 50% 0%, transparent 62%, rgba(0, 0, 0, 0.16) 100%);
-  box-shadow: inset 0 0 34px rgba(224, 57, 62, 0.06);
-}
-
-/* ---- minimal base (decorative) ---- */
-.lt-base {
-  display: block;
-  width: 95%;
-  margin: -0.4% auto 0;
-}
-/* hinge recess — dark slot where the lid meets the deck */
-.lt-hinge {
-  display: block;
-  width: 100%;
-  aspect-ratio: 118 / 1;
-  background: linear-gradient(180deg, #030304 0%, #0a0a0d 55%, #17171d 100%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.045);
-}
-/* keyboard deck — thin sliver, flaring slightly toward the viewer */
-.lt-deck {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 19 / 1;
-  clip-path: polygon(1.1% 0, 98.9% 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, #26262f 0%, #1a1a21 42%, #111116 100%);
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.55),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-}
-/* a whisper of key rows + spacing, fading toward the front */
-.lt-deck-keys {
-  position: absolute;
-  left: 6%;
-  right: 6%;
-  top: 14%;
-  height: 58%;
-  border-radius: 4px;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 2.9%, transparent 2.9% 3.9%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.16));
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
-}
-/* cool screen light spilling onto the deck near the hinge */
-.lt-deck-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(58% 170% at 50% -35%, rgba(168, 178, 198, 0.13), transparent 62%);
-}
-/* front lip — slim bright edge with the thumb notch */
-.lt-lip {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 60 / 1;
-  border-radius: 1px 1px 7px 7px;
-  background: linear-gradient(180deg, #8d8d98 0%, #31313a 26%, #141419 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 252, 244, 0.34),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
-    0 3px 7px rgba(0, 0, 0, 0.5),
-    0 12px 30px rgba(0, 0, 0, 0.55);
-}
-.lt-notch {
-  width: 11%;
-  height: 34%;
-  border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.66);
-  box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.9),
-    0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* ---- rear lights (shared rig with the monitor) ---- */
-.lt-halo {
-  position: absolute;
-  inset: -7% -6% -12% -6%;
-  z-index: -1;
-  filter: blur(26px);
-  pointer-events: none;
-  background:
-    /* dark backing first — separates the glow from whatever busy
-       content sits behind the laptop (e.g. the hero TV) */
-    radial-gradient(ellipse 50% 42% at 50% 40%, rgba(3, 3, 6, 0.66), transparent 68%),
-    radial-gradient(ellipse 58% 46% at 50% 38%, rgba(240, 50, 60, 0.27), transparent 70%),
-    radial-gradient(ellipse 24% 20% at 16% 22%, rgba(255, 246, 230, 0.1), transparent 72%),
-    radial-gradient(ellipse 22% 18% at 84% 26%, rgba(142, 16, 27, 0.22), transparent 74%);
-  animation: amb-breathe-kf 7.5s ease-in-out infinite;
-}
-.lt-edge {
-  position: absolute;
-  inset: 2% -4% 4% -4%;
-  z-index: -1;
-  border-radius: 18px;
-  pointer-events: none;
-  filter: blur(14px);
-  box-shadow:
-    0 0 30px 8px rgba(3, 3, 6, 0.7),
-    0 0 60px 16px rgba(240, 50, 60, 0.22);
-}
-
-/* desk under the laptop: dark contact shadow + crimson light pool */
-.lt-floor {
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  margin-top: 4px;
-  width: 104%;
-  height: 52px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 44% 46% at 50% 42%, rgba(0, 0, 0, 0.6), transparent 70%),
-    radial-gradient(ellipse at center, rgba(240, 50, 60, 0.16), rgba(142, 16, 27, 0.06) 46%, transparent 68%),
-    linear-gradient(180deg, rgba(255, 246, 230, 0.05), transparent 55%);
-  filter: blur(10px);
-}
 
 /* ---- shared Ambilight for TV cutouts (real photos with their own bezel) ---- */
 .amb-halo {
@@ -1140,6 +988,25 @@ html {
   filter: blur(12px);
 }
 
+/* ---- laptop ambient: dark backing + restrained crimson/warm pool
+   behind the studio render. Grounds the projected chassis on the
+   stage and separates it from the busy TV artwork behind. The
+   laptop visual occupies ~17%–83% of the wrapper width and
+   ~10%–90% of its height, so the glow hugs that window. ---- */
+.hero-laptop-amb {
+  position: absolute;
+  inset: 5% 9% 3% 9%;
+  z-index: -1;
+  filter: blur(26px);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 42% at 50% 44%, rgba(3, 3, 6, 0.62), transparent 68%),
+    radial-gradient(ellipse 58% 48% at 50% 42%, rgba(240, 50, 60, 0.20), transparent 72%),
+    radial-gradient(ellipse 24% 20% at 18% 24%, rgba(255, 246, 230, 0.08), transparent 72%),
+    radial-gradient(ellipse 22% 18% at 82% 28%, rgba(142, 16, 27, 0.18), transparent 74%);
+  animation: amb-breathe-kf 7s ease-in-out infinite;
+}
+
 /* ---- phone: delicate warm rim + controlled red glow ---- */
 .hero-phone-rim .phone-mockup {
   outline: 1px solid rgba(255, 246, 230, 0.3);
@@ -1201,6 +1068,7 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .hero-fade,
   .hero-tv-backlight,
+  .hero-laptop-amb,
   .phone-glow {
     animation: none;
   }

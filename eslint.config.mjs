@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const eslintConfig = [
-  // build-tooling scripts are not part of the app
-  { ignores: ["scripts/**"] },
+  // build-tooling scripts and uploaded reference projects are not part of the app
+  { ignores: ["scripts/**", "upload/**"] },
   ...nextCoreWebVitals,
   ...nextTypescript,
   {
