@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { MonitorFrame } from "./devices/monitor-frame";
+import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
+import { FRONT_CAMERA } from "./devices/studio-laptop/studio-laptop-render";
 import { Reveal } from "./reveal";
 import { DESKTOP_NAV_ITEMS, SCREENSHOTS } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -44,8 +45,13 @@ type ViewId = (typeof VIEWS)[number]["id"] | (typeof LIVE)["id"];
 
 /**
  * Real-time screen recording of the desktop app, looping silently.
- * Pauses whenever the monitor leaves the viewport or the tab is hidden,
- * so it never burns CPU/bandwidth in the background.
+ * Pauses whenever the laptop screen leaves the viewport or the tab
+ * is hidden, so it never burns CPU/bandwidth in the background.
+ *
+ * Lives inside the laptop's 1403x930 projected screen surface, which
+ * the browser renders at ~45% scale — so badge metrics are authored
+ * in screen pixels (~2.15x) to land at the same visual size they had
+ * on the old monitor mockup.
  */
 function LiveNowPlayingVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -103,16 +109,17 @@ function LiveNowPlayingVideo() {
         draggable={false}
         aria-label={LIVE.alt}
       />
-      {/* live badge */}
+      {/* live badge — authored in laptop-screen pixels (1403px surface,
+          rendered ~45% — matches the old monitor badge visually) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-3.5 top-3.5 z-10 flex items-center gap-2 rounded-full border border-crimson/40 bg-black/55 px-3 py-1.5 backdrop-blur-sm sm:left-4 sm:top-4"
+        className="pointer-events-none absolute left-8 top-8 z-10 flex items-center gap-3 rounded-full border border-crimson/40 bg-black/55 px-6 py-3 backdrop-blur-sm"
       >
-        <span className="relative flex h-1.5 w-1.5">
+        <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson-bright opacity-70" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-crimson-bright" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-crimson-bright" />
         </span>
-        <span className="font-mono text-[9px] font-medium uppercase tracking-[0.28em] text-white/85">
+        <span className="font-mono text-[19px] font-medium uppercase tracking-[0.28em] text-white/85">
           Live recording
         </span>
       </div>
@@ -189,10 +196,14 @@ export function DesktopExperience() {
           </Reveal>
         </div>
 
-        {/* ---- monitor showcase ---- */}
-        <div>
+        {/* ---- laptop showcase — the same photoreal studio render as
+              the hero, posed dead-on (FRONT_CAMERA); the view switcher
+              drives its screen: live recording + real app views ---- */}
+        <div className="relative">
+          {/* ambient pool — grounds the render on the dark stage */}
+          <div aria-hidden className="dl-amb" />
           <Reveal delay={0.05}>
-            <MonitorFrame parallax={false}>
+            <StudioLaptopStage camera={FRONT_CAMERA} className="w-full">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
@@ -210,18 +221,18 @@ export function DesktopExperience() {
                         src={current.src}
                         alt={current.alt}
                         fill
-                        sizes="(max-width: 1024px) 92vw, 58vw"
+                        sizes="(max-width: 1024px) 190px, 380px"
                         className="object-cover object-center"
                       />
                     )
                   )}
                 </motion.div>
               </AnimatePresence>
-            </MonitorFrame>
+            </StudioLaptopStage>
           </Reveal>
 
           {/* view switcher */}
-          <Reveal delay={0.12} className="mt-24 sm:mt-28">
+          <Reveal delay={0.12} className="mt-6 sm:mt-8">
             <div
               role="tablist"
               aria-label="Desktop app views"

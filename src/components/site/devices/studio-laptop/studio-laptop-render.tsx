@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useId, useMemo, type ReactNode } from "react";
 import {
   type CameraConfig,
   type Point2D,
@@ -36,7 +36,9 @@ import {
  * and the screen + keyboard deck are flat surfaces mapped on with
  * solved homography matrix3d transforms. The default pose faces the
  * viewer with a slight left bias — perfect for a right-hand hero
- * placement looking back at the headline.
+ * placement looking back at the headline. A second, dead-on FRONT
+ * pose (via the `camera` prop) powers the desktop showcase section,
+ * and `children` swaps the screen content (live video / tab views).
  */
 
 /* Real screenshot pixel size — the screen div is exactly this big so
@@ -48,31 +50,59 @@ const SCREEN_SRC = "/assets/desktop/desktop-hero.webp";
 export const STAGE_WIDTH = 1440;
 export const STAGE_HEIGHT = 960;
 
-/* Fixed hero pose — three-quarter view, deck front angled toward the
- * lower-left, screen normal facing slightly left (toward the copy). */
-const YAW_DEG = -19.5;
-const PITCH_DEG = 17.5;
-const LID_ANGLE_DEG = 102.5;
 const KEY_LIGHT = 1.0;
 const CRIMSON_RIM = 1.0;
 const SCREEN_BRIGHTNESS = 1.02;
 const SHADOW_INTENSITY = 1.0;
 
-export const StudioLaptopRender: React.FC = () => {
-  const cam: CameraConfig = useMemo(
-    () => ({
-      yawDeg: YAW_DEG,
-      pitchDeg: PITCH_DEG,
-      lidAngleDeg: LID_ANGLE_DEG,
-      distance: 1060,
-      focalLength: 2280,
-      target: { x: -8, y: 60, z: 98 },
-      /* recentred so the projected laptop (incl. contact shadow) is
-       * horizontally and vertically centered in the 1440x960 stage */
-      viewportCenter: { x: 726.35, y: 517.05 },
-    }),
-    []
-  );
+/* Fixed hero pose — three-quarter view, deck front angled toward the
+ * lower-left, screen normal facing slightly left (toward the copy).
+ * Hand-tuned so the projected laptop (incl. contact shadow) is
+ * horizontally and vertically centered in the 1440x960 stage. */
+export const HERO_CAMERA: CameraConfig = {
+  yawDeg: -19.5,
+  pitchDeg: 17.5,
+  lidAngleDeg: 102.5,
+  distance: 1060,
+  focalLength: 2280,
+  target: { x: -8, y: 60, z: 98 },
+  viewportCenter: { x: 726.35, y: 517.05 },
+};
+
+/* Front-facing product pose — dead-on and perfectly symmetric (yaw 0),
+ * pitch 16° still reveals the keyboard deck below the screen. Derived
+ * by projecting the full chassis + contact-shadow bounding box and
+ * solving the focal length + viewport centre that centres it in the
+ * 1440x960 stage: the laptop fills ~75% of the width and ~86% of the
+ * height, with even margins for the shadow blur to breathe. */
+export const FRONT_CAMERA: CameraConfig = {
+  yawDeg: 0,
+  pitchDeg: 16,
+  lidAngleDeg: 102.5,
+  distance: 1060,
+  focalLength: 2656.03,
+  target: { x: 0, y: 60, z: 98 },
+  viewportCenter: { x: 720.0, y: 557.85 },
+};
+
+export const StudioLaptopRender: React.FC<{
+  /** Camera pose — defaults to the hero three-quarter view. */
+  camera?: CameraConfig;
+  /**
+   * Optional screen content, rendered inside the projected display
+   * aperture (a 1403x930 surface homography-mapped onto the screen
+   * quad) in place of the default hero screenshot. Fill it with
+   * absolutely-positioned media (video / next-image) — it inherits
+   * the laptop's perspective exactly.
+   */
+  children?: ReactNode;
+}> = ({ camera = HERO_CAMERA, children }) => {
+  const cam = camera;
+  /* Unique SVG def ids per instance — the page mounts this laptop
+   * twice (hero + desktop showcase) and duplicate filter/gradient
+   * ids would collide across the two SVGs. */
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const svgId = (name: string) => `sl-${uid}-${name}`;
 
   // Physical dimensions in millimeter-scale 3D space
   const halfW = 178; // 356mm total width
@@ -87,7 +117,7 @@ export const StudioLaptopRender: React.FC = () => {
   // Convert display lid local coordinates (u, v, w) to 3D world space
   // u: [-halfW..+halfW], v: [0..lidHeight] along lid face, w: [-lidThickness..0] depth into back shell
   const lidPointToWorld = useMemo(() => {
-    const tiltBackRad = ((LID_ANGLE_DEG - 90) * Math.PI) / 180;
+    const tiltBackRad = ((cam.lidAngleDeg - 90) * Math.PI) / 180;
     const cosT = Math.cos(tiltBackRad);
     const sinT = Math.sin(tiltBackRad);
     const hingeY = 1.2;
@@ -98,7 +128,7 @@ export const StudioLaptopRender: React.FC = () => {
       y: hingeY + v * cosT - w * sinT,
       z: hingeZ - v * sinT + w * cosT,
     });
-  }, []);
+  }, [cam]);
 
   // 1. Compute 4 Projected Corners of the Active Display Screen Aperture
   // Physical screen aperture: u in [-172.4, +172.4] (344.8mm), v in [8.2, 236.76]
@@ -330,8 +360,11 @@ export const StudioLaptopRender: React.FC = () => {
     ];
 
     // Side ports on the wall that FACES the camera:
-    // with negative yaw the camera sits at +X, so the +halfW wall is visible.
-    const sideX = YAW_DEG <= 0 ? halfW : -halfW;
+    // with negative yaw the camera sits at +X, so the +halfW wall is
+    // visible. Dead-on (|yaw| < 3°) both side walls are edge-on — the
+    // port cutouts would collapse to zero-width slivers, so they are
+    // omitted entirely for the front pose.
+    const sideX = cam.yawDeg <= 0 ? halfW : -halfW;
     const makeSidePort = (zStart: number, zEnd: number, yTop: number, yBot: number) =>
       pointsToSvgPath([
         projectPoint3D({ x: sideX, y: yTop, z: zStart }, cam),
@@ -340,16 +373,19 @@ export const StudioLaptopRender: React.FC = () => {
         projectPoint3D({ x: sideX, y: yBot, z: zStart }, cam),
       ]);
 
-    const sidePorts = [
-      // MagSafe 3 Port
-      { d: makeSidePort(28, 46, -2.8, -7.6), isMagSafe: true },
-      // Thunderbolt / USB-C Port 1
-      { d: makeSidePort(58, 71, -3.4, -7.2), isMagSafe: false },
-      // Thunderbolt / USB-C Port 2
-      { d: makeSidePort(82, 95, -3.4, -7.2), isMagSafe: false },
-      // 3.5mm Studio Audio Jack
-      { d: makeSidePort(110, 116, -3.8, -7.0), isMagSafe: false },
-    ];
+    const sidePorts =
+      Math.abs(cam.yawDeg) < 3
+        ? []
+        : [
+            // MagSafe 3 Port
+            { d: makeSidePort(28, 46, -2.8, -7.6), isMagSafe: true },
+            // Thunderbolt / USB-C Port 1
+            { d: makeSidePort(58, 71, -3.4, -7.2), isMagSafe: false },
+            // Thunderbolt / USB-C Port 2
+            { d: makeSidePort(82, 95, -3.4, -7.2), isMagSafe: false },
+            // 3.5mm Studio Audio Jack
+            { d: makeSidePort(110, 116, -3.8, -7.0), isMagSafe: false },
+          ];
 
     // Four Rubber Feet underneath the chassis corners + their tight contact shadows
     const footConfigs = [
@@ -485,8 +521,7 @@ export const StudioLaptopRender: React.FC = () => {
       >
         <defs>
           {/* Tight Natural Studio Contact Shadow Blur */}
-          <filter
-            id="contact-shadow-outer"
+          <filter id={svgId("contact-shadow-outer")}
             x="-20%"
             y="-20%"
             width="140%"
@@ -494,8 +529,7 @@ export const StudioLaptopRender: React.FC = () => {
           >
             <feGaussianBlur stdDeviation="22" />
           </filter>
-          <filter
-            id="contact-shadow-core"
+          <filter id={svgId("contact-shadow-core")}
             x="-15%"
             y="-15%"
             width="130%"
@@ -503,8 +537,7 @@ export const StudioLaptopRender: React.FC = () => {
           >
             <feGaussianBlur stdDeviation="9" />
           </filter>
-          <filter
-            id="foot-shadow-blur"
+          <filter id={svgId("foot-shadow-blur")}
             x="-30%"
             y="-30%"
             width="160%"
@@ -512,12 +545,12 @@ export const StudioLaptopRender: React.FC = () => {
           >
             <feGaussianBlur stdDeviation="3.5" />
           </filter>
-          <filter id="rim-glow-soft" x="-20%" y="-20%" width="140%" height="140%">
+          <filter id={svgId("rim-glow-soft")} x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="1.6" />
           </filter>
 
           {/* Matte-Black Anodized Display Lid Front Bezel Gradient */}
-          <linearGradient id="lid-bezel-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={svgId("lid-bezel-grad")} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#1B1B21" />
             <stop offset="35%" stopColor="#111116" />
             <stop offset="75%" stopColor="#0C0C10" />
@@ -525,14 +558,14 @@ export const StudioLaptopRender: React.FC = () => {
           </linearGradient>
 
           {/* Display Glass Inner Frame Gradient */}
-          <linearGradient id="lid-glass-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={svgId("lid-glass-grad")} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0E0E12" />
             <stop offset="50%" stopColor="#08080B" />
             <stop offset="100%" stopColor="#0C0A0E" />
           </linearGradient>
 
           {/* Warm-White Studio Key Light Edge Gradient */}
-          <linearGradient id="warm-key-light" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={svgId("warm-key-light")} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgba(255, 247, 237, 0.15)" />
             <stop offset="28%" stopColor="rgba(254, 243, 199, 0.85)" />
             <stop offset="65%" stopColor="rgba(255, 250, 245, 0.9)" />
@@ -540,14 +573,14 @@ export const StudioLaptopRender: React.FC = () => {
           </linearGradient>
 
           {/* Subtle Crimson Rim Light Gradient */}
-          <linearGradient id="crimson-rim-light" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={svgId("crimson-rim-light")} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="rgba(251, 113, 133, 0.78)" />
             <stop offset="50%" stopColor="rgba(225, 29, 72, 0.88)" />
             <stop offset="100%" stopColor="rgba(159, 18, 57, 0.25)" />
           </linearGradient>
 
           {/* Lower Base Tapered Pan Gradient */}
-          <linearGradient id="base-pan-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={svgId("base-pan-grad")} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#09090C" />
             <stop offset="48%" stopColor="#121217" />
             <stop offset="85%" stopColor="#0B0B0E" />
@@ -555,7 +588,7 @@ export const StudioLaptopRender: React.FC = () => {
           </linearGradient>
 
           {/* Cylindrical Hinge Gradient */}
-          <linearGradient id="hinge-barrel-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={svgId("hinge-barrel-grad")} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#26262E" />
             <stop offset="40%" stopColor="#121217" />
             <stop offset="100%" stopColor="#060608" />
@@ -567,19 +600,19 @@ export const StudioLaptopRender: React.FC = () => {
           <path
             d={geometryPaths.shadowOuterPath}
             fill="rgba(0, 0, 0, 0.48)"
-            filter="url(#contact-shadow-outer)"
+            filter={`url(#${svgId("contact-shadow-outer")})`}
           />
           <path
             d={geometryPaths.shadowCorePath}
             fill="rgba(0, 0, 0, 0.76)"
-            filter="url(#contact-shadow-core)"
+            filter={`url(#${svgId("contact-shadow-core")})`}
           />
           {geometryPaths.rubberFeet.map((rf, i) => (
             <path
               key={`fsh-${i}`}
               d={rf.shadowPath}
               fill="rgba(0, 0, 0, 0.88)"
-              filter="url(#foot-shadow-blur)"
+              filter={`url(#${svgId("foot-shadow-blur")})`}
             />
           ))}
         </g>
@@ -598,13 +631,13 @@ export const StudioLaptopRender: React.FC = () => {
         {/* 3. LOWER CHASSIS TAPERED BELLY PAN (Underneath the vertical deck walls) */}
         <path
           d={geometryPaths.deckPanPath}
-          fill="url(#base-pan-grad)"
+          fill={`url(#${svgId("base-pan-grad")})`}
           stroke="rgba(255,255,255,0.05)"
           strokeWidth="0.8"
         />
         <path
           d={geometryPaths.deckMidPath}
-          fill="url(#base-pan-grad)"
+          fill={`url(#${svgId("base-pan-grad")})`}
           stroke="rgba(0,0,0,0.8)"
           strokeWidth="1"
         />
@@ -624,13 +657,13 @@ export const StudioLaptopRender: React.FC = () => {
         {/* 5. DISPLAY LID FRONT ANODIZED ALUMINUM FRAME & GLASS BEZEL */}
         <path
           d={geometryPaths.lidFrontPath}
-          fill="url(#lid-bezel-grad)"
+          fill={`url(#${svgId("lid-bezel-grad")})`}
           stroke="rgba(255, 250, 242, 0.22)"
           strokeWidth="1.1"
         />
         <path
           d={geometryPaths.lidInnerPath}
-          fill="url(#lid-glass-grad)"
+          fill={`url(#${svgId("lid-glass-grad")})`}
           stroke="rgba(255, 255, 255, 0.06)"
           strokeWidth="0.8"
         />
@@ -639,10 +672,10 @@ export const StudioLaptopRender: React.FC = () => {
         <path
           d={geometryPaths.topKeyLightPath}
           fill="none"
-          stroke="url(#warm-key-light)"
+          stroke={`url(#${svgId("warm-key-light")})`}
           strokeWidth={2.2 * KEY_LIGHT}
           strokeLinecap="round"
-          filter="url(#rim-glow-soft)"
+          filter={`url(#${svgId("rim-glow-soft")})`}
           opacity={0.9 * KEY_LIGHT}
         />
 
@@ -650,7 +683,7 @@ export const StudioLaptopRender: React.FC = () => {
         <path
           d={geometryPaths.rightCrimsonRimPath}
           fill="none"
-          stroke="url(#crimson-rim-light)"
+          stroke={`url(#${svgId("crimson-rim-light")})`}
           strokeWidth={2.0 * CRIMSON_RIM}
           strokeLinecap="round"
           opacity={0.85 * CRIMSON_RIM}
@@ -658,7 +691,7 @@ export const StudioLaptopRender: React.FC = () => {
         <path
           d={geometryPaths.leftCrimsonRimPath}
           fill="none"
-          stroke="url(#crimson-rim-light)"
+          stroke={`url(#${svgId("crimson-rim-light")})`}
           strokeWidth={1.6 * CRIMSON_RIM}
           strokeLinecap="round"
           opacity={0.7 * CRIMSON_RIM}
@@ -703,17 +736,24 @@ export const StudioLaptopRender: React.FC = () => {
         {/* Native-ratio screenshot: fills the aperture exactly — no
             crop, no stretch, no letterbox (aperture re-derived to
             match 1403x930). */}
-        <img
-          src={SCREEN_SRC}
-          alt="Bitify Music desktop application — home view with library and player"
-          width={SCREEN_PIXEL_WIDTH}
-          height={SCREEN_PIXEL_HEIGHT}
-          draggable={false}
-          fetchPriority="high"
-          decoding="async"
-          className="block h-full w-full select-none"
-          style={{ objectFit: "fill" }}
-        />
+        {children ? (
+          /* Caller-supplied screen content (live video / tab views in
+           * the desktop showcase) — fills the same projected aperture
+           * and inherits the laptop's perspective. */
+          <div className="absolute inset-0">{children}</div>
+        ) : (
+          <img
+            src={SCREEN_SRC}
+            alt="Bitify Music desktop application — home view with library and player"
+            width={SCREEN_PIXEL_WIDTH}
+            height={SCREEN_PIXEL_HEIGHT}
+            draggable={false}
+            fetchPriority="high"
+            decoding="async"
+            className="block h-full w-full select-none"
+            style={{ objectFit: "fill" }}
+          />
+        )}
 
         {/* Subtle Studio Display Glass Diagonal Reflection Overlay */}
         <div
@@ -735,7 +775,7 @@ export const StudioLaptopRender: React.FC = () => {
         {/* Cylindrical Anodized Hinge Barrel */}
         <path
           d={geometryPaths.hingePath}
-          fill="url(#hinge-barrel-grad)"
+          fill={`url(#${svgId("hinge-barrel-grad")})`}
           stroke="rgba(255,255,255,0.08)"
           strokeWidth="0.7"
         />

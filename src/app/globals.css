@@ -1065,10 +1065,28 @@ html {
   animation: amb-breathe-kf 5.5s ease-in-out infinite;
 }
 
+/* ---- desktop showcase: ambient pool grounding the front-facing
+   laptop (same lighting language as the hero, a touch calmer since
+   there is no busy artwork behind it) ---- */
+.dl-amb {
+  position: absolute;
+  inset: 5% 9% 3% 9%;
+  z-index: -1;
+  filter: blur(26px);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 42% at 50% 44%, rgba(3, 3, 6, 0.58), transparent 68%),
+    radial-gradient(ellipse 58% 48% at 50% 42%, rgba(240, 50, 60, 0.17), transparent 72%),
+    radial-gradient(ellipse 24% 20% at 18% 24%, rgba(255, 246, 230, 0.07), transparent 72%),
+    radial-gradient(ellipse 22% 18% at 82% 28%, rgba(142, 16, 27, 0.16), transparent 74%);
+  animation: amb-breathe-kf 7s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-fade,
   .hero-tv-backlight,
   .hero-laptop-amb,
+  .dl-amb,
   .phone-glow {
     animation: none;
   }

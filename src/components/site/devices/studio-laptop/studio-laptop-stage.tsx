@@ -1,7 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import type { CameraConfig } from "./homography";
 import { STAGE_HEIGHT, STAGE_WIDTH, StudioLaptopRender } from "./studio-laptop-render";
 
 /**
@@ -13,10 +14,23 @@ import { STAGE_HEIGHT, STAGE_WIDTH, StudioLaptopRender } from "./studio-laptop-r
  * measured synchronously in a layout effect (no flash of an
  * oversized laptop) and kept in sync through a ResizeObserver.
  *
- * The projected laptop content occupies ~66% of the stage width and
+ * The projected laptop occupies ~66% of the stage width and
  * ~80% of its height, centered — size the wrapper accordingly.
+ * Pass `camera` (e.g. FRONT_CAMERA) for the dead-on product view,
+ * and `children` to drive the laptop screen with your own content.
  */
-export function StudioLaptopStage({ className }: { className?: string }) {
+export function StudioLaptopStage({
+  className,
+  camera,
+  children,
+}: {
+  className?: string;
+  /** Camera pose — defaults to the hero three-quarter view. */
+  camera?: CameraConfig;
+  /** Screen content; see StudioLaptopRender. When present the stage
+   * is exposed to assistive tech so the media alts stay reachable. */
+  children?: ReactNode;
+}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
 
@@ -36,7 +50,7 @@ export function StudioLaptopStage({ className }: { className?: string }) {
   return (
     <div
       ref={wrapRef}
-      aria-hidden
+      aria-hidden={!children}
       className={cn("relative w-full", className)}
       style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
     >
@@ -50,7 +64,7 @@ export function StudioLaptopStage({ className }: { className?: string }) {
           }}
           className="absolute left-0 top-0"
         >
-          <StudioLaptopRender />
+          <StudioLaptopRender camera={camera}>{children}</StudioLaptopRender>
         </div>
       )}
     </div>
