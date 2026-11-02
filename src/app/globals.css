@@ -193,21 +193,24 @@ html {
 }
 
 /* ---------- Equalizer motif ----------
- * A pronounced, music-visualizer pulse. Each bar gets its own phase
- * (negative delay → bars are mid-motion immediately) and tempo via
- * `--eq-i`, so the group never moves in lockstep. */
+ * A living music-visualizer pulse. Every bar gets its own tempo
+ * (increasing with --eq-i) and a negative phase offset, so the
+ * group never moves in lockstep; multi-beat keyframes give the
+ * rhythm an organic, audio-reactive feel. scaleY keeps it on the
+ * compositor and confined to each bar's box. */
 @keyframes eq-bar {
-  0%, 100% { transform: scaleY(0.22); }
-  30% { transform: scaleY(1); }
-  55% { transform: scaleY(0.42); }
-  78% { transform: scaleY(0.88); }
+  0%, 100% { transform: scaleY(0.28); }
+  26% { transform: scaleY(0.94); }
+  50% { transform: scaleY(0.42); }
+  72% { transform: scaleY(1); }
+  88% { transform: scaleY(0.55); }
 }
 
 .eq-bar {
-  transform-origin: bottom;
-  animation: eq-bar 1s cubic-bezier(0.4, 0, 0.35, 1) infinite;
-  animation-delay: calc(var(--eq-i, 0) * -0.217s);
-  animation-duration: calc(0.86s + var(--eq-i, 0) * 0.113s);
+  transform-origin: center bottom;
+  animation: eq-bar 720ms ease-in-out infinite;
+  animation-duration: calc(620ms + var(--eq-i, 0) * 118ms);
+  animation-delay: calc(var(--eq-i, 0) * -173ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -857,154 +860,105 @@ html {
 }
 
 /* ============================================================
-   LaptopMockup — a real 3D clamshell (CSS perspective)
+   LaptopMockup — photoreal lid + minimal Apple-style base
    ------------------------------------------------------------
-   One perspective stage; the body turns to the camera (left
-   edge forward, looking slightly from above). The lid stands
-   up and opens a few degrees past vertical; the deck folds
-   toward the viewer around the hinge (rotateX 76°) and the
-   front lip folds down from the deck's front edge — a solid
-   wedge with real thickness. The screenshot rides in the lid,
-   so it takes the same perspective as a product photo.
+   The lid is a generated studio-shot chassis (transparent
+   cutout); the app screenshot sits in its measured screen
+   rect, so the panel ratio matches the shot exactly — no
+   crop, no distortion. Below it, a restrained CSS base:
+   hinge recess, thin deck sliver with key-row whispers and
+   screen-light spill, slim bright front lip with the thumb
+   notch. Proportions follow real MacBook front views.
    ============================================================ */
-
-/* the stage reserves room under the lid for the foreshortened
-   deck + front lip that swing toward the camera */
-.lt3d-stage {
-  perspective: 1500px;
-  perspective-origin: 50% 32%;
-  padding-bottom: 12.5%;
-}
-.lt3d-body {
+.lt-lid {
   position: relative;
-  transform-style: preserve-3d;
-  /* the reference angle: left edge forward with a stronger,
-     more dramatic turn; camera a touch above the deck */
-  transform: rotateX(4deg) rotateY(12deg);
+  /* silhouette shadow follows the cutout alpha */
+  filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.55));
 }
-
-/* ---- lid — aluminium shell, opened just past vertical ---- */
-.lt3d-lid {
-  position: relative;
-  transform-origin: 50% 100%;
-  transform: rotateX(2deg);
-  border-radius: 14px 14px 10px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: linear-gradient(180deg, #2b2b34 0%, #1a1a21 55%, #121217 100%);
-  padding: clamp(7px, 1.7%, 12px);
-  box-shadow:
-    /* sharp specular chamfer along the entire top edge */
-    inset 0 1.5px 0 rgba(255, 252, 244, 0.42),
-    inset 0 3px 0 rgba(255, 255, 255, 0.13),
-    /* dark hinge shadow line under the chin */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-    0 30px 80px -18px rgba(0, 0, 0, 0.8),
-    /* crimson rim wash */
-    0 0 26px rgba(240, 50, 60, 0.16);
+.lt-lid img {
+  border-radius: 14px;
 }
-.lt3d-camera {
+/* the screenshot window — pixel-mapped to the chassis screen */
+.lt-screen {
   position: absolute;
-  top: clamp(2px, 0.45%, 3.5px);
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  transform: translateX(-50%);
-  border-radius: 9999px;
-  background: radial-gradient(circle at 35% 35%, #3a3a44 0%, #0b0b0f 75%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07);
-}
-.lt3d-screen {
-  position: relative;
-  aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: 7px;
-  background: #000;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: #0b0b0d;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
-/* glass sheen + faint crimson ambience over the panel */
-.lt3d-glass {
+.lt-glass {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.09) 0%, transparent 28%),
-    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 60%, rgba(0, 0, 0, 0.18) 100%);
-  box-shadow: inset 0 0 42px rgba(224, 57, 62, 0.08);
+    linear-gradient(112deg, rgba(255, 255, 255, 0.085) 0%, transparent 26%),
+    radial-gradient(ellipse 130% 100% at 50% 0%, transparent 62%, rgba(0, 0, 0, 0.16) 100%);
+  box-shadow: inset 0 0 34px rgba(224, 57, 62, 0.06);
 }
 
-/* ---- deck — the base surface folding toward the viewer ---- */
-.lt3d-deck {
-  position: absolute;
-  top: 100%;
-  left: 0;
+/* ---- minimal base (decorative) ---- */
+.lt-base {
+  display: block;
+  width: 95%;
+  margin: -0.4% auto 0;
+}
+/* hinge recess — dark slot where the lid meets the deck */
+.lt-hinge {
+  display: block;
   width: 100%;
-  /* depth ≈ 33% of the lid width — a thin, elegant base */
-  aspect-ratio: 3.05;
-  transform-origin: 50% 0;
-  transform: rotateX(76deg);
-  border-radius: 3px 3px 10px 10px;
-  background:
-    /* dark hinge recess where lid meets base */
-    linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 12%),
-    /* screen light spilling onto the deck near the hinge */
-    linear-gradient(180deg, rgba(150, 160, 180, 0.13) 0%, transparent 36%),
-    linear-gradient(180deg, #2b2b34 0%, #1c1c23 48%, #131318 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  aspect-ratio: 118 / 1;
+  background: linear-gradient(180deg, #030304 0%, #0a0a0d 55%, #17171d 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.045);
 }
-/* keyboard well — a whisper of key rows, foreshortened by the fold */
-.lt3d-kb {
-  position: absolute;
-  top: 11%;
-  left: 11%;
-  right: 11%;
-  height: 54%;
-  border-radius: 6px;
-  background:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0 14%, transparent 14% 18%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 3.4%, transparent 3.4% 4.4%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.22));
+/* keyboard deck — thin sliver, flaring slightly toward the viewer */
+.lt-deck {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 19 / 1;
+  clip-path: polygon(1.1% 0, 98.9% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, #26262f 0%, #1a1a21 42%, #111116 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
-    inset 0 1px 2px rgba(255, 255, 255, 0.05);
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
-.lt3d-pad {
+/* a whisper of key rows + spacing, fading toward the front */
+.lt-deck-keys {
   position: absolute;
-  bottom: 6%;
-  left: 50%;
-  width: 26%;
-  height: 20%;
-  transform: translateX(-50%);
+  left: 6%;
+  right: 6%;
+  top: 14%;
+  height: 58%;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 2.9%, transparent 2.9% 3.9%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
 }
-
-/* ---- front lip — folds down from the deck's front edge ---- */
-.lt3d-lip {
+/* cool screen light spilling onto the deck near the hinge */
+.lt-deck-glow {
   position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  /* the laptop's thickness — a thin, tapered edge */
-  aspect-ratio: 40 / 1;
-  transform-origin: 50% 0;
-  transform: rotateX(-74deg);
+  inset: 0;
+  background: radial-gradient(58% 170% at 50% -35%, rgba(168, 178, 198, 0.13), transparent 62%);
+}
+/* front lip — slim bright edge with the thumb notch */
+.lt-lip {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px 2px 8px 8px;
-  background: linear-gradient(180deg, #55555f 0%, #2a2a32 32%, #141419 100%);
+  width: 100%;
+  aspect-ratio: 60 / 1;
+  border-radius: 1px 1px 7px 7px;
+  background: linear-gradient(180deg, #8d8d98 0%, #31313a 26%, #141419 100%);
   box-shadow:
-    /* bright metallic edge catching the light */
-    inset 0 1.5px 0 rgba(255, 252, 244, 0.45),
+    inset 0 1px 0 rgba(255, 252, 244, 0.34),
     inset 0 -1px 0 rgba(0, 0, 0, 0.6),
-    0 12px 30px rgba(0, 0, 0, 0.65),
-    0 0 22px rgba(224, 57, 62, 0.13);
+    0 3px 7px rgba(0, 0, 0, 0.5),
+    0 12px 30px rgba(0, 0, 0, 0.55);
 }
-.lt3d-notch {
-  width: 12%;
+.lt-notch {
+  width: 11%;
   height: 34%;
   border-radius: 9999px;
   background: rgba(0, 0, 0, 0.66);
@@ -1016,7 +970,7 @@ html {
 /* ---- rear lights (shared rig with the monitor) ---- */
 .lt-halo {
   position: absolute;
-  inset: -8% -7% -14% -7%;
+  inset: -7% -6% -12% -6%;
   z-index: -1;
   filter: blur(26px);
   pointer-events: none;
@@ -1031,14 +985,14 @@ html {
 }
 .lt-edge {
   position: absolute;
-  inset: 1% -5% 3% -5%;
+  inset: 2% -4% 4% -4%;
   z-index: -1;
-  border-radius: 16px;
+  border-radius: 18px;
   pointer-events: none;
+  filter: blur(14px);
   box-shadow:
-    0 0 0 1px rgba(255, 246, 230, 0.09),
-    0 0 36px 12px rgba(3, 3, 6, 0.72),
-    0 0 64px 14px rgba(240, 50, 60, 0.28);
+    0 0 30px 8px rgba(3, 3, 6, 0.7),
+    0 0 60px 16px rgba(240, 50, 60, 0.22);
 }
 
 /* desk under the laptop: dark contact shadow + crimson light pool */

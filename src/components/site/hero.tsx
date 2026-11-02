@@ -13,14 +13,15 @@ import { MOBILE_SCREENS, SCREENSHOTS, TV_SHOTS } from "@/lib/site-config";
 /**
  * Hero — a cinematic product shoot in CSS.
  *
- * One near-black stage, three real devices and a full lighting
- * rig: a warm-white key spot behind the TV, crimson fills behind
- * the desktop and the phone, thin warm rims on every frame,
- * contact shadows and a muted reflective floor. The whole rig
- * fades in on load (`.hero-fade`), only the device backlights
- * breathe, and three parallax layers drift gently on scroll.
- * Entrance animations stay pure CSS (`.hero-rise*`) so the hero
- * renders before hydration; framer-motion only adds the parallax.
+ * One near-black stage, three real devices and a restrained lighting
+ * rig. The laptop is the star of the composition: a photoreal
+ * chassis front-left, large and clearly readable. The TV sits behind
+ * it, centered, adding depth without competing; the phone stands to
+ * the right at a believable size. The whole rig fades in on load
+ * (`.hero-fade`); only the device backlights breathe afterwards, and
+ * three parallax layers drift gently on scroll. Entrance animations
+ * stay pure CSS (`.hero-rise*`) so the hero renders before
+ * hydration; framer-motion only adds the parallax and idle floats.
  */
 export function Hero() {
   const reduce = useReducedMotion();
@@ -30,10 +31,11 @@ export function Hero() {
     offset: ["start end", "end start"],
   });
 
-  // layered parallax rates — restrained; the further forward, the faster
-  const tvY = useTransform(scrollYProgress, [0, 1], [-18, 42]);
-  const laptopY = useTransform(scrollYProgress, [0, 1], [4, -30]);
-  const phoneY = useTransform(scrollYProgress, [0, 1], [18, -58]);
+  // layered parallax rates — minimal and restrained; the further
+  // forward the layer, the gentle faster drift
+  const tvY = useTransform(scrollYProgress, [0, 1], [-12, 26]);
+  const laptopY = useTransform(scrollYProgress, [0, 1], [2, -16]);
+  const phoneY = useTransform(scrollYProgress, [0, 1], [8, -28]);
 
   return (
     <section
@@ -70,7 +72,7 @@ export function Hero() {
           className="hero-badge eyebrow flex items-center gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 backdrop-blur-sm"
           style={{ "--d": "0.05s" } as CSSProperties}
         >
-          <Equalizer bars={5} className="h-3.5" />
+          <Equalizer bars={5} className="h-4" />
           Introducing Bitify Music
         </p>
 
@@ -112,20 +114,21 @@ export function Hero() {
           </a>
         </div>
 
-        {/* ---- device stage — TV behind, laptop front-left, phone front-right ---- */}
+        {/* ---- device stage — the laptop leads, the TV adds depth,
+              the phone stands clear to the right ---- */}
         <div
           ref={stageRef}
-          className="relative mt-12 h-[400px] w-full max-w-[1040px] sm:h-[540px] lg:h-[580px]"
+          className="relative mt-12 h-[440px] w-full max-w-[1040px] sm:h-[520px] lg:h-[550px]"
           aria-label="Bitify Music running on a TV, laptop and smartphone"
         >
           {/* TV — real photo cutout, rearmost layer, lit from behind */}
           <motion.div
             style={reduce ? undefined : { y: tvY }}
-            className="absolute left-1/2 top-0 w-[100%] -translate-x-1/2 sm:w-[86%] lg:w-[74%]"
+            className="absolute left-1/2 top-0 w-[78%] -translate-x-1/2 sm:w-[64%] lg:w-[62%]"
           >
             <div
               className="hero-rise-stage relative"
-              style={{ "--d": "0.55s" } as CSSProperties}
+              style={{ "--d": "0.5s" } as CSSProperties}
             >
               {/* backlight — warm key light + crimson wash behind the panel */}
               <div aria-hidden className="hero-tv-backlight" />
@@ -135,7 +138,7 @@ export function Hero() {
                   shot={TV_SHOTS.nowplaying}
                   priority
                   fit="width"
-                  sizes="(max-width: 640px) 96vw, 76vw"
+                  sizes="(max-width: 640px) 80vw, 62vw"
                 />
               </div>
               {/* contact shadow + light pool under the stand */}
@@ -143,41 +146,46 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* laptop — middle layer, a real 3D clamshell front-left */}
+          {/* laptop — the hero device: photoreal chassis, front-left */}
           <motion.div
             style={reduce ? undefined : { y: laptopY }}
-            className="absolute bottom-[1%] left-[-2%] w-[90%] sm:bottom-[2%] sm:left-[2%] sm:w-[62%] lg:bottom-[1%] lg:left-[1%] lg:w-[57%]"
+            className="absolute bottom-0 left-[-2%] w-[76%] sm:left-[1%] sm:w-[56%] lg:left-[1%] lg:w-[52%]"
           >
             <div
               className="hero-rise-stage"
-              style={{ "--d": "0.72s" } as CSSProperties}
+              style={{ "--d": "0.64s" } as CSSProperties}
             >
-              <LaptopMockup>
-                <Image
-                  src={SCREENSHOTS.desktop.hero}
-                  alt="Bitify Music desktop application — home view with library and player"
-                  fill
-                  priority
-                  sizes="(max-width: 640px) 90vw, 57vw"
-                  className="object-cover object-top"
-                />
-              </LaptopMockup>
+              <motion.div
+                animate={reduce ? undefined : { y: [0, -4, 0] }}
+                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <LaptopMockup>
+                  <Image
+                    src={SCREENSHOTS.desktop.hero}
+                    alt="Bitify Music desktop application — home view with library and player"
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 76vw, 52vw"
+                    className="object-cover"
+                  />
+                </LaptopMockup>
+              </motion.div>
             </div>
           </motion.div>
 
-          {/* phone — front layer, CSS body around a real app screenshot */}
+          {/* phone — front-right, realistic size, clear of the laptop */}
           <motion.div
             style={reduce ? undefined : { y: phoneY }}
-            className="absolute bottom-[0%] right-[1%] sm:bottom-[2%] sm:right-[5%] lg:right-[4%]"
+            className="absolute bottom-[1%] right-[1%] sm:bottom-[2%] sm:right-[5%] lg:bottom-[2%] lg:right-[4%]"
           >
             <div
               className="hero-rise-stage hero-rise-rotate relative"
-              style={{ "--d": "0.9s" } as CSSProperties}
+              style={{ "--d": "0.78s" } as CSSProperties}
             >
               <motion.div
                 animate={reduce ? undefined : { y: [0, -8, 0] }}
                 transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-                className="rotate-[3deg] [--pw:min(26vw,168px)] sm:[--pw:min(19vw,196px)] lg:[--pw:204px]"
+                className="rotate-[3deg] [--pw:100px] sm:[--pw:160px] lg:[--pw:190px]"
               >
                 <div className="relative">
                   {/* controlled red glow hugging the phone */}
@@ -187,7 +195,7 @@ export function Hero() {
                     <PhoneMockup
                       screen={MOBILE_SCREENS.nowplaying}
                       priority
-                      sizes="(max-width: 640px) 26vw, 204px"
+                      sizes="(max-width: 640px) 100px, 190px"
                     />
                   </div>
                   {/* contact shadow + red pool on the floor */}

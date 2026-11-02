@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
 
 interface LaptopMockupProps {
   children: ReactNode;
@@ -9,50 +10,53 @@ interface LaptopMockupProps {
 }
 
 /**
- * Premium 3D laptop mockup — a real CSS clamshell, not a flat cutout.
+ * Photoreal laptop mockup — hybrid construction.
  *
- * One perspective stage; the body turns to the camera like the
- * reference shoot: left edge slightly forward (rotateY) and a hint
- * of a downward camera (rotateX). The lid opens just past vertical,
- * the keyboard deck folds toward the viewer around the hinge line
- * (rotateX ≈ 76°) and the front lip folds down from the deck's front
- * edge — so the base reads as a solid wedge with real thickness.
- * The screenshot lives inside the lid, so it follows the screen
- * plane and picks up the same perspective as a real product photo.
- *
- * Lighting matches the site rig: a breathing crimson ambilight
- * behind the chassis, a warm-white specular chamfer along the lid's
- * top edge, screen light spilling onto the deck, a metallic
- * highlight on the front lip and a crimson pool on the desk.
+ * The lid is a real (AI-generated, studio-shot) aluminium chassis whose
+ * screen area was measured pixel-exactly, so the app screenshot drops
+ * into it with zero crop or distortion — the panel ratio matches the
+ * screenshot ratio precisely. Under the lid sits a minimal, Apple-
+ * marketing-style base: a hinge recess, a thin keyboard-deck sliver
+ * with a whisper of key rows and screen-light spill, and a slim front
+ * lip with the thumb notch. The same lighting rig as the rest of the
+ * stage: breathing ambilight halo, warm rim, contact shadow + crimson
+ * pool on the desk.
  */
 export function LaptopMockup({ children, className }: LaptopMockupProps) {
   return (
-    <div className={cn("lt3d-scene relative", className)}>
+    <div className={cn("lt-scene relative", className)}>
       {/* ambilight — breathing crimson wash behind the chassis */}
       <div aria-hidden className="lt-halo" />
       <div aria-hidden className="lt-edge" />
 
-      <div className="lt3d-stage">
-        <div className="lt3d-body">
-          {/* lid — aluminium shell, thin bezels, camera dot */}
-          <div className="lt3d-lid">
-            <span aria-hidden className="lt3d-camera" />
-            <div className="lt3d-screen">
-              {children}
-              <span aria-hidden className="lt3d-glass" />
-            </div>
-          </div>
-
-          {/* deck — keyboard surface foreshortened toward the viewer */}
-          <div aria-hidden className="lt3d-deck">
-            <span className="lt3d-kb" />
-            <span className="lt3d-pad" />
-            {/* front lip — folds down from the deck's front edge */}
-            <span className="lt3d-lip">
-              <span className="lt3d-notch" />
-            </span>
-          </div>
+      {/* lid — photoreal chassis cutout, screen area pixel-mapped */}
+      <div className="lt-lid">
+        <Image
+          src="/assets/desktop/laptop-lid.webp"
+          alt=""
+          width={886}
+          height={643}
+          priority
+          draggable={false}
+          className="h-auto w-full select-none"
+        />
+        <div className="lt-screen" style={SCREEN_RECT as CSSProperties}>
+          {children}
+          {/* glass sheen over the panel */}
+          <span aria-hidden className="lt-glass" />
         </div>
+      </div>
+
+      {/* minimal base — hinge, deck sliver, front lip (decorative) */}
+      <div aria-hidden className="lt-base">
+        <span className="lt-hinge" />
+        <span className="lt-deck">
+          <span className="lt-deck-keys" />
+          <span className="lt-deck-glow" />
+        </span>
+        <span className="lt-lip">
+          <span className="lt-notch" />
+        </span>
       </div>
 
       {/* desk below: contact shadow + crimson light pool */}
@@ -60,3 +64,15 @@ export function LaptopMockup({ children, className }: LaptopMockupProps) {
     </div>
   );
 }
+
+/**
+ * Screen rectangle measured from the generated lid asset (886×643):
+ * screen is 801×531 px at offset (42, 44) — ratio 1.5085, matching the
+ * desktop screenshot ratio (1403×930 = 1.5086) exactly.
+ */
+const SCREEN_RECT = {
+  left: "4.74%",
+  top: "6.84%",
+  width: "90.41%",
+  height: "82.58%",
+} as const;
