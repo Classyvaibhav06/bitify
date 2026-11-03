@@ -10,7 +10,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { HERO_CAROUSEL } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -44,8 +43,11 @@ import { cn } from "@/lib/utils";
  * -----------
  * The carousel advances by itself every few seconds while it is on screen,
  * pausing automatically while the visitor drags, swipes, navigates or tabs
- * (and whenever the tab is hidden or reduced motion is preferred). A small
- * pause/play control next to the dots lets the visitor stop it for good.
+ * (and whenever the tab is hidden). A small pause/play control next to the
+ * dots lets the visitor stop it for good. It keeps running under
+ * `prefers-reduced-motion` too — the CSS shortens every transition to a
+ * quick, subtle change there, and the explicit pause control keeps the
+ * carousel WCAG-compliant.
  *
  * Transitions are pure CSS transforms/opacity (GPU-friendly). The initial
  * render is fully positioned server-side, so the carousel is visible even
@@ -57,8 +59,8 @@ const N = HERO_CAROUSEL.length; // 7 unique screens
 /** keep in sync with `--cf-gap` in globals.css (calc(var(--pw) * 0.66)) */
 const GAP_FACTOR = 0.66;
 /** auto-switch cadence, and how long any interaction pauses it */
-const AUTOPLAY_MS = 4800;
-const INTERACTION_PAUSE_MS = 7000;
+const AUTOPLAY_MS = 4200;
+const INTERACTION_PAUSE_MS = 5000;
 
 /** shortest signed circular distance, mapped to [-N/2, N/2) */
 function circDist(offset: number): number {
@@ -92,7 +94,6 @@ interface DragState {
 }
 
 export function DeviceCoverflow({ className }: { className?: string }) {
-  const reduce = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [dragF, setDragF] = useState(0);
@@ -128,9 +129,10 @@ export function DeviceCoverflow({ className }: { className?: string }) {
     setActive((a) => (((a + dir) % N) + N) % N);
   }, []);
 
-  /* ---------- auto-switch (skipped entirely for reduced motion) ---------- */
+  /* ---------- auto-switch (runs even under reduced motion — see the CSS
+     block that shortens the transitions there; the pause button stays
+     available for anyone who wants it stopped) ---------- */
   useEffect(() => {
-    if (reduce) return;
     const stage = stageRef.current;
     if (!stage || typeof IntersectionObserver === "undefined") return;
 
@@ -139,7 +141,9 @@ export function DeviceCoverflow({ className }: { className?: string }) {
       (entries) => {
         visible = entries[0]?.isIntersecting ?? false;
       },
-      { threshold: 0.3 }
+      // generous threshold — even a partly visible stage (short viewports,
+      // embedded preview panes) keeps the carousel alive
+      { threshold: 0.12 }
     );
     io.observe(stage);
 
@@ -154,7 +158,7 @@ export function DeviceCoverflow({ className }: { className?: string }) {
       io.disconnect();
       window.clearInterval(id);
     };
-  }, [reduce, step]);
+  }, [step]);
 
   const toggleAuto = () => {
     const next = !auto.current.on;

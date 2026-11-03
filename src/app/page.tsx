@@ -6,6 +6,7 @@ import { MobileExperience } from "@/components/site/mobile-experience";
 import { TvExperience } from "@/components/site/tv-experience";
 import { Ecosystem } from "@/components/site/ecosystem";
 import { Features } from "@/components/site/features";
+import { Integrations } from "@/components/site/integrations";
 import { Downloads } from "@/components/site/downloads";
 import { Faq } from "@/components/site/faq";
 import { Footer } from "@/components/site/footer";
@@ -22,6 +23,7 @@ export default function Home() {
         <TvExperience />
         <Ecosystem />
         <Features />
+        <Integrations />
         <Downloads />
         <Faq />
       </main>

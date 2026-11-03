@@ -1204,6 +1204,18 @@ html {
     filter: brightness(calc(0.84 + var(--halo, 0) * 0.16));
     transition: filter 140ms ease, opacity 140ms ease, transform 140ms ease;
   }
+  /* the carousel still auto-advances under reduced motion, but every hop is
+     a quick, subtle change instead of the full 3D glide — and the entrance
+     animation settles instantly */
+  .cf-slide {
+    transition-duration: 180ms;
+    transition-timing-function: ease;
+  }
+  .cf-slide .cf-enter,
+  .cf-glow,
+  .cf-floor {
+    animation: none;
+  }
 }
 
 /* cache-refresh 1793524400 */
