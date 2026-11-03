@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Github, Youtube } from "lucide-react";
 import { BrandLogo } from "./brand-logo";
 import { Equalizer } from "./equalizer";
 import { Reveal } from "./reveal";
@@ -126,6 +126,38 @@ export function Footer() {
           >
             BITIFY
           </p>
+        </Reveal>
+
+        {/* credits — built on open ground */}
+        <Reveal delay={0.1} className="mt-16 sm:mt-20">
+          <div className="flex flex-col items-center justify-center gap-x-10 gap-y-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-6 text-center sm:flex-row sm:text-left">
+            <p className="text-xs leading-relaxed text-muted-warm">
+              Designed &amp; developed by{" "}
+              <span className="font-semibold tracking-wide text-warm-white">
+                Vishnu
+              </span>
+            </p>
+            <span aria-hidden className="hidden h-3.5 w-px bg-white/10 sm:block" />
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-warm transition-colors hover:text-warm-white"
+            >
+              <Github className="h-3.5 w-3.5" aria-hidden />
+              Built with open-source scripts &amp; data from GitHub
+            </a>
+            <span aria-hidden className="hidden h-3.5 w-px bg-white/10 sm:block" />
+            <a
+              href="https://music.youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-warm transition-colors hover:text-warm-white"
+            >
+              <Youtube className="h-3.5 w-3.5" aria-hidden />
+              Design language inspired by YouTube Music
+            </a>
+          </div>
         </Reveal>
 
         {/* legal line */}

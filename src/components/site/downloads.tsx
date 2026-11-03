@@ -6,7 +6,8 @@ import { Reveal } from "./reveal";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { DeviceShotImage } from "./devices/device-shot";
 import { Ambilight } from "./devices/ambilight";
-import { MonitorFrame } from "./devices/monitor-frame";
+import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
+import { FRONT_CAMERA } from "./devices/studio-laptop/studio-laptop-render";
 import {
   DOWNLOADS,
   MOBILE_SCREENS,
@@ -55,15 +56,20 @@ function PlatformVisual({ id }: { id: PlatformId }) {
   if (id === "desktop") {
     return (
       <div className="relative mx-auto w-full max-w-[560px]">
-        <MonitorFrame parallax={false}>
+        {/* ambient pool — grounds the laptop on the dark stage */}
+        <div aria-hidden className="dl-amb" />
+        {/* the same photoreal studio laptop as the hero + desktop
+            showcase, posed dead-on for a clean product shot; the home
+            screenshot (1403x930) maps 1:1 onto the projected screen */}
+        <StudioLaptopStage camera={FRONT_CAMERA} className="w-full">
           <Image
             src={SCREENSHOTS.desktop.home}
             alt="Bitify Music desktop interface — home view with the sidebar, player bar and browse grid"
             fill
             sizes="(max-width: 1023px) 88vw, 560px"
-            className="object-cover object-top"
+            className="object-cover object-center"
           />
-        </MonitorFrame>
+        </StudioLaptopStage>
       </div>
     );
   }
