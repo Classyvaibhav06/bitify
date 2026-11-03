@@ -19,10 +19,10 @@
  * promo-*.webp               Official promotional artwork (provided brand assets)
  *
  * ─── DOWNLOAD LINKS ───────────────────────────────────────────────────────
- * No official download URLs have been published yet. Set `downloadUrl` for
- * each platform below once available — the UI will automatically switch from
- * the "coming soon" state to a real download button. Version strings and
- * OS compatibility should also be filled in here when confirmed.
+ * Desktop (Windows x64 setup) and Android (arm64 APK) installers are live
+ * on GitHub Releases. Set `downloadUrl` for TV once it ships — the UI
+ * automatically switches from the "coming soon" state to a real download
+ * button. Version strings and OS compatibility live here too.
  */
 
 export type PlatformId = "desktop" | "mobile" | "tv";
@@ -43,24 +43,26 @@ export const DOWNLOADS: DownloadConfig[] = [
   {
     id: "desktop",
     platform: "Desktop / PC",
-    requirements: "", // TODO: add verified OS support
-    version: "", // TODO: add current release version
-    downloadUrl: null, // TODO: set official installer link
+    requirements: "Windows 10 or later · 64-bit",
+    version: "v1.6",
+    downloadUrl:
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v1.6/Bitify-1.6-windows-x64-setup.exe",
     installSteps: [
-      "Download the Bitify Music installer for your computer.",
+      "Download the Bitify Music setup for Windows.",
       "Run the installer and follow the on-screen steps.",
       "Open Bitify Music and start listening.",
     ],
   },
   {
     id: "mobile",
-    platform: "Mobile",
-    requirements: "", // TODO: add verified device support
-    version: "",
-    downloadUrl: null, // TODO: set store listing link
+    platform: "Android",
+    requirements: "Android · 64-bit (ARM64) · APK installer",
+    version: "v1.6",
+    downloadUrl:
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.6/Bitify-1.6-arm64.apk",
     installSteps: [
-      "Get Bitify Music from your device's app store.",
-      "Install and open the app.",
+      "Download the Bitify Music APK on your Android phone.",
+      "Open the file and tap Allow if Android asks to install from your browser.",
       "Sign in and your library is ready to go.",
     ],
   },
@@ -110,7 +112,7 @@ export const FAQ_ITEMS = [
   {
     question: "How can I download Bitify Music?",
     answer:
-      "Download links for Desktop, Mobile and TV are published in the Downloads section of this page as each release goes live. Head there to get the latest version for your screen of choice.",
+      "Bitify Music for Windows and the Android app (APK) are available now — grab them from the Downloads section of this page. The TV app's link will be published there as soon as it goes live.",
   },
   {
     question: "How do I install the desktop version?",

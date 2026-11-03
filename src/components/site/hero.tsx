@@ -7,7 +7,12 @@ import { Equalizer } from "./equalizer";
 import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
 import { DeviceShotImage } from "./devices/device-shot";
 import { PhoneMockup } from "./devices/phone-mockup";
-import { MOBILE_SCREENS, TV_SHOTS } from "@/lib/site-config";
+import { MOBILE_SCREENS, TV_SHOTS, DOWNLOADS } from "@/lib/site-config";
+
+/** the hero's "Download for PC" CTA links the real Windows setup as soon as
+ *  it is published in site-config, and falls back to the downloads section */
+const DESKTOP_DOWNLOAD =
+  DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? "#downloads";
 
 /**
  * Hero — a cinematic product shoot in CSS.
@@ -107,7 +112,7 @@ export function Hero() {
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
           </a>
           <a
-            href="#downloads"
+            href={DESKTOP_DOWNLOAD}
             className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.03] px-7 py-3.5 text-sm font-semibold tracking-wide text-warm-white backdrop-blur-sm transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07]"
           >
             <MonitorSmartphone className="h-4 w-4 text-muted-warm transition-colors group-hover:text-warm-white" aria-hidden />

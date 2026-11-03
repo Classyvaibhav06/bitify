@@ -30,15 +30,15 @@ const PLATFORM_META: Record<
 > = {
   desktop: {
     icon: Monitor,
-    note: "Installer for your computer",
-    tagline: "For Windows & macOS",
+    note: "Windows installer · 64-bit",
+    tagline: "For Windows",
     title: "Bitify for Desktop",
     text: "A full studio for your library — a persistent player bar, keyboard-first controls, and a Now Playing view built for losing yourself in an album.",
   },
   mobile: {
     icon: Smartphone,
-    note: "App for your phone",
-    tagline: "For Android & iOS",
+    note: "Android APK · ARM64",
+    tagline: "For Android",
     title: "Bitify for Mobile",
     text: "Your music in your pocket — quick picks, synced lyrics and a one-handed player that goes wherever you do.",
   },
