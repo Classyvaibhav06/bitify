@@ -146,7 +146,7 @@ export function DesktopExperience() {
         className="absolute right-[-10%] top-[10%] -z-10 h-[480px] w-[480px] rounded-full bg-crimson/[0.05] blur-[120px]"
       />
 
-      <div className="mx-auto grid max-w-[1200px] gap-16 px-6 py-28 sm:py-36 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
+      <div className="mx-auto grid max-w-[1200px] gap-16 px-6 py-28 sm:py-36 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,7.4fr)] lg:gap-12">
         {/* ---- editorial column ---- */}
         <div className="lg:sticky lg:top-28 lg:self-start">
           <Reveal>

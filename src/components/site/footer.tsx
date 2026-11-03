@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowUpRight, Github, Youtube } from "lucide-react";
+import { Github, Youtube } from "lucide-react";
 import { BrandLogo } from "./brand-logo";
 import { Equalizer } from "./equalizer";
+import { LegalDialogs } from "./legal-dialogs";
 import { Reveal } from "./reveal";
 import { NAV_LINKS } from "@/lib/site-config";
 
@@ -10,12 +11,6 @@ const PRODUCT_LINKS = [
   { label: "Downloads", href: "#downloads" },
   { label: "FAQ", href: "#faq" },
   { label: "Features", href: "#features" },
-] as const;
-
-const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: null },
-  { label: "Terms of Service", href: null },
-  { label: "Support", href: null },
 ] as const;
 
 export function Footer() {
@@ -86,33 +81,9 @@ export function Footer() {
 
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30">
-                  Support
+                  Support &amp; legal
                 </p>
-                <ul className="mt-5 space-y-3">
-                  {LEGAL_LINKS.map((link) => (
-                    <li key={link.label}>
-                      {link.href ? (
-                        <a
-                          href={link.href}
-                          className="inline-flex items-center gap-1 text-sm text-muted-warm transition-colors hover:text-warm-white"
-                        >
-                          {link.label}
-                          <ArrowUpRight className="h-3 w-3" aria-hidden />
-                        </a>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1.5 text-sm text-white/25"
-                          title="Link will be added when available"
-                        >
-                          {link.label}
-                          <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.14em]">
-                            soon
-                          </span>
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <LegalDialogs />
               </div>
             </nav>
           </div>

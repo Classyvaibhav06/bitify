@@ -73,16 +73,17 @@ export const HERO_CAMERA: CameraConfig = {
  * pitch 16° still reveals the keyboard deck below the screen. Derived
  * by projecting the full chassis + contact-shadow bounding box and
  * solving the focal length + viewport centre that centres it in the
- * 1440x960 stage: the laptop fills ~75% of the width and ~86% of the
- * height, with even margins for the shadow blur to breathe. */
+ * 1440x960 stage: the laptop fills ~79% of the width and ~92% of the
+ * height — a touch larger than the hero crop, with just enough margin
+ * for the contact-shadow blur to breathe. */
 export const FRONT_CAMERA: CameraConfig = {
   yawDeg: 0,
   pitchDeg: 16,
   lidAngleDeg: 102.5,
   distance: 1060,
-  focalLength: 2656.03,
+  focalLength: 2825.9,
   target: { x: 0, y: 60, z: 98 },
-  viewportCenter: { x: 720.0, y: 557.85 },
+  viewportCenter: { x: 720.0, y: 562.83 },
 };
 
 export const StudioLaptopRender: React.FC<{

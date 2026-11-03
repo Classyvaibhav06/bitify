@@ -1065,6 +1065,22 @@ html {
   animation: amb-breathe-kf 5.5s ease-in-out infinite;
 }
 
+/* ---- legal dialogs: stronger backdrop + blur so the dialog pops
+   off the dark page, and a slimmer dark scrollbar ---- */
+[data-slot="dialog-overlay"] {
+  background: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(5px);
+}
+
+[data-slot="dialog-content"]::-webkit-scrollbar {
+  width: 10px;
+}
+[data-slot="dialog-content"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  border: 3px solid #0a0a0d;
+}
+
 /* ---- desktop showcase: ambient pool grounding the front-facing
    laptop (same lighting language as the hero, a touch calmer since
    there is no busy artwork behind it) ---- */

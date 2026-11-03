@@ -55,7 +55,7 @@ const PLATFORM_META: Record<
 function PlatformVisual({ id }: { id: PlatformId }) {
   if (id === "desktop") {
     return (
-      <div className="relative mx-auto w-full max-w-[560px]">
+      <div className="relative mx-auto w-full max-w-[640px]">
         {/* ambient pool — grounds the laptop on the dark stage */}
         <div aria-hidden className="dl-amb" />
         {/* the same photoreal studio laptop as the hero + desktop
@@ -66,7 +66,7 @@ function PlatformVisual({ id }: { id: PlatformId }) {
             src={SCREENSHOTS.desktop.home}
             alt="Bitify Music desktop interface — home view with the sidebar, player bar and browse grid"
             fill
-            sizes="(max-width: 1023px) 88vw, 560px"
+            sizes="(max-width: 1023px) 88vw, 640px"
             className="object-cover object-center"
           />
         </StudioLaptopStage>
@@ -159,7 +159,12 @@ export function Downloads() {
               key={dl.id}
               aria-label={`Download Bitify Music for ${dl.platform}`}
               className={cn(
-                "grid items-center gap-12 border-t border-white/[0.05] py-16 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:py-24",
+                "grid items-center gap-12 border-t border-white/[0.05] py-16 sm:py-20 lg:gap-16 lg:py-24",
+                // desktop row: extra-wide visual column so the laptop
+                // render reads large; other rows stay 50/50
+                i === 0
+                  ? "lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]"
+                  : "lg:grid-cols-2",
                 i === 0 && "border-t-0"
               )}
             >
