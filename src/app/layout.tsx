@@ -16,7 +16,9 @@ const geistMono = Geist_Mono({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  // only the weights the display face actually uses (500 = FAQ
+  // questions, 600 = headings, 700 = hero/footer wordmark)
+  weight: ["500", "600", "700"],
 });
 
 const siteUrl = "https://bitify.music";

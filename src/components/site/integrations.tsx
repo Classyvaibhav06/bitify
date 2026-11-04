@@ -61,10 +61,11 @@ export function Integrations() {
       aria-label="Integrations"
       className="relative overflow-hidden border-t border-white/[0.05]"
     >
-      {/* faint ambience so the strip doesn't sit flat on pure black */}
+      {/* faint ambience so the strip doesn't sit flat on pure black —
+          soft radial wash, no blur filter (cheaper on mobile) */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-1/2 -z-10 h-[380px] w-[860px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.05),transparent_65%)] blur-[100px]"
+        className="absolute left-1/2 top-1/2 -z-10 h-[380px] w-[860px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.05),transparent_65%)]"
       />
 
       {/* ---- centered header ---- */}

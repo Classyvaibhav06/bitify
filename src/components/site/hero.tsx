@@ -75,7 +75,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto flex min-h-svh max-w-[1200px] flex-col items-center px-6 pb-16 pt-24 sm:pt-28">
         {/* ---- copy ---- */}
         <p
-          className="hero-badge eyebrow flex items-center gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 backdrop-blur-sm"
+          className="hero-badge eyebrow flex items-center gap-3 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2"
           style={{ "--d": "0.05s" } as CSSProperties}
         >
           <Equalizer bars={5} className="h-4" />
@@ -113,7 +113,7 @@ export function Hero() {
           </a>
           <a
             href={DESKTOP_DOWNLOAD}
-            className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.03] px-7 py-3.5 text-sm font-semibold tracking-wide text-warm-white backdrop-blur-sm transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07]"
+            className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold tracking-wide text-warm-white transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07]"
           >
             <MonitorSmartphone className="h-4 w-4 text-muted-warm transition-colors group-hover:text-warm-white" aria-hidden />
             Download for PC

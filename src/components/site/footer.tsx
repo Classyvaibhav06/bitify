@@ -21,10 +21,10 @@ export function Footer() {
       aria-label="Footer"
       className="relative mt-auto overflow-hidden border-t border-white/[0.05] bg-[#040405]"
     >
-      {/* ambient */}
+      {/* ambient — soft radial wash, no blur filter (cheaper on mobile) */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-0 -z-0 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.06),transparent_65%)] blur-[100px]"
+        className="absolute left-1/2 top-0 -z-0 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.06),transparent_65%)]"
       />
 
       <div className="relative mx-auto max-w-[1200px] px-6 pb-12 pt-20 sm:pt-24">

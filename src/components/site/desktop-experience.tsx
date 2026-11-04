@@ -113,7 +113,7 @@ function LiveNowPlayingVideo() {
           rendered ~45% — matches the old monitor badge visually) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-8 top-8 z-10 flex items-center gap-3 rounded-full border border-crimson/40 bg-black/55 px-6 py-3 backdrop-blur-sm"
+        className="pointer-events-none badge-glass absolute left-8 top-8 z-10 flex items-center gap-3 rounded-full border border-crimson/40 bg-black/55 px-6 py-3"
       >
         <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson-bright opacity-70" />
@@ -140,10 +140,12 @@ export function DesktopExperience() {
       aria-label="Desktop experience"
       className="relative overflow-hidden border-t border-white/[0.05]"
     >
-      {/* ambient */}
+      {/* ambient — a soft radial wash (no blur filter: the gradient
+          already fades to transparent, and a 480px blur layer is a
+          serious cost on mobile GPUs) */}
       <div
         aria-hidden
-        className="absolute right-[-10%] top-[10%] -z-10 h-[480px] w-[480px] rounded-full bg-crimson/[0.05] blur-[120px]"
+        className="absolute right-[-10%] top-[10%] -z-10 h-[480px] w-[480px] rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.05),transparent_65%)]"
       />
 
       <div className="mx-auto grid max-w-[1200px] gap-16 px-6 py-28 sm:py-36 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,7.4fr)] lg:gap-12">

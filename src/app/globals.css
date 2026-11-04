@@ -620,8 +620,11 @@ html {
   color: var(--warm-white);
   background: rgba(13, 13, 17, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.14);
+  /* NOTE: declare only the standard `backdrop-filter` here — the
+     Tailwind/Lightning pipeline auto-emits the -webkit- twin for it.
+     Writing both by hand makes Lightning keep ONLY the prefixed one,
+     which Chrome ≥ 156 no longer honours. */
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.75);
   cursor: pointer;
   transform: translateY(-50%);
@@ -1218,4 +1221,125 @@ html {
   }
 }
 
-/* cache-refresh 1793524400 */
+/* ============================================================
+   Site navbar — translucent glass bar.
+   The backdrop-filter lives in a class (not a Tailwind utility)
+   so it can be dropped cleanly on small screens, where a live
+   blur behind a fixed header re-filters the page on every
+   scroll frame.
+   ============================================================ */
+.site-nav {
+  /* standard property only — the pipeline emits the -webkit- twin */
+  backdrop-filter: blur(14px);
+}
+.site-nav-top {
+  background: rgba(6, 6, 7, 0.55);
+}
+.site-nav-scrolled {
+  background: rgba(6, 6, 7, 0.9);
+}
+
+/* "Live recording" badge over the playing desktop video — a
+   backdrop-filter over moving video re-filters every frame,
+   so it is dropped on small screens (see the mobile block). */
+.badge-glass {
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================================
+   Mobile performance tuning (≤ 767px)
+   ------------------------------------------------------------
+   Small, power-constrained screens get a lighter render with
+   the same design: capped blur radii (filter cost scales with
+   radius × area), parked idle breathing loops (no continuous
+   compositing), coverflow hops limited to transform/opacity,
+   solid fills instead of live backdrop-filters, and offscreen
+   sections skipped entirely (content-visibility) so opening
+   the page only pays for the hero.
+   ============================================================ */
+@media (max-width: 767px) {
+  /* studio lighting: same look, much cheaper radii */
+  .hero-tv-backlight { filter: blur(14px); }
+  .hero-laptop-amb,
+  .dl-amb { filter: blur(12px); }
+  .phone-glow { filter: blur(12px); }
+  .mf-halo,
+  .amb-halo { filter: blur(12px); }
+  .hero-floor,
+  .hero-tv-floor,
+  .hero-phone-shadow,
+  .mf-floor { filter: blur(6px); }
+  .cf-glow { filter: blur(5px); }
+  .cf-floor { filter: blur(8px); }
+  .cf-halo { filter: blur(9px); }
+
+  /* park the idle breathe/pulse loops — static mid-glow instead
+     (the carousel itself keeps auto-advancing) */
+  .hero-tv-backlight,
+  .hero-laptop-amb,
+  .dl-amb,
+  .phone-glow,
+  .mf-halo,
+  .amb-halo,
+  .cf-glow,
+  .mf-led {
+    animation: none;
+  }
+  .hero-tv-backlight,
+  .hero-laptop-amb,
+  .dl-amb,
+  .phone-glow,
+  .mf-halo,
+  .amb-halo,
+  .cf-glow {
+    opacity: 0.85;
+  }
+
+  /* coverflow hops: transform + opacity only — per-slide
+     brightness/saturate filters force a re-raster every frame */
+  .cf-slide .cf-enter {
+    filter: none;
+    transition:
+      opacity var(--cf-dur) var(--cf-ease),
+      transform var(--cf-dur) var(--cf-ease);
+  }
+  .cf-slide,
+  .cf-halo { will-change: auto; }
+
+  /* nav buttons: solid glass instead of a live backdrop-filter */
+  .cf-nav {
+    backdrop-filter: none;
+    background: rgba(13, 13, 17, 0.85);
+  }
+  .cf-nav:hover {
+    background: rgba(224, 57, 62, 0.16);
+  }
+
+  /* fixed header: no backdrop-filter while scrolling */
+  .site-nav {
+    backdrop-filter: none;
+  }
+  .site-nav-top { background: rgba(6, 6, 7, 0.78); }
+  .site-nav-scrolled { background: rgba(6, 6, 7, 0.95); }
+
+  /* live badge over the playing video: plain dark pill */
+  .badge-glass {
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.72);
+  }
+}
+
+/* Offscreen sections skip layout/paint/style on small screens —
+   the browser renders only what approaches the viewport, so the
+   first paint pays for the hero alone. `contain-intrinsic-size`
+   keeps the scrollbar stable; the `auto` keyword adopts each
+   section's real height once rendered. Older browsers ignore
+   this and simply render everything, as before. */
+@media (max-width: 767px) {
+  main > section:not(#top) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+  }
+}
+
+/* cache-refresh 1793806200 */

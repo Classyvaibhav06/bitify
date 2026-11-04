@@ -306,8 +306,10 @@ export function DeviceCoverflow({ className }: { className?: string }) {
                   } as CSSProperties
                 }
               >
-                {/* spotlight behind this phone — strongest at the front */}
-                <div aria-hidden className="cf-halo" />
+                {/* spotlight behind this phone — strongest at the front.
+                    Only slides with a visible halo strength render one,
+                    so a hop composites ~3 blurred layers instead of 7. */}
+                {m.halo > 0.02 && <div aria-hidden className="cf-halo" />}
                 <div className="cf-enter">
                   <PhoneMockup
                     screen={screen}

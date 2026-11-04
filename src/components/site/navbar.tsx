@@ -48,10 +48,10 @@ export function Navbar() {
 
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500",
+          "site-nav fixed inset-x-0 top-0 z-50 transition-all duration-500",
           scrolled
-            ? "border-b border-white/[0.08] bg-[#060607]/90 shadow-[0_12px_44px_-24px_rgba(0,0,0,0.95)] backdrop-blur-xl"
-            : "border-b border-white/[0.05] bg-[#060607]/55 backdrop-blur-md"
+            ? "site-nav-scrolled border-b border-white/[0.08] shadow-[0_12px_44px_-24px_rgba(0,0,0,0.95)]"
+            : "site-nav-top border-b border-white/[0.05]"
         )}
       >
         <nav
@@ -118,7 +118,7 @@ export function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.3 }}
-            className="fixed inset-0 z-40 flex flex-col bg-[#060607]/97 backdrop-blur-2xl lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col bg-[#060607]/[0.985] lg:hidden"
           >
             <div className="flex h-[72px] items-center justify-between px-6">
               <span className="text-sm font-medium text-muted-warm">Menu</span>

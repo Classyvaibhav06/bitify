@@ -88,10 +88,11 @@ export function TvExperience() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* floor reflection hint under the set */}
+              {/* floor reflection hint under the set — radial wash
+                  instead of a blur-2xl filter (cheaper on mobile) */}
               <div
                 aria-hidden
-                className="absolute left-1/2 top-full mt-3 h-14 w-[72%] -translate-x-1/2 rounded-[100%] bg-black/75 blur-2xl"
+                className="absolute left-1/2 top-full mt-3 h-14 w-[72%] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(ellipse,rgba(0,0,0,0.75),transparent_70%)]"
               />
             </div>
           </div>

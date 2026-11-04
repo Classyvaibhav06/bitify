@@ -41,10 +41,12 @@ export function MobileExperience() {
       aria-label="Mobile experience"
       className="relative overflow-hidden border-t border-white/[0.05]"
     >
-      {/* warm ambience for this section */}
+      {/* warm ambience for this section — soft radial wash, no blur
+          filter (a 100px blur over a 760px box is very expensive
+          on mobile GPUs) */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-[8%] -z-10 h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.07),transparent_65%)] blur-[100px]"
+        className="absolute left-1/2 top-[8%] -z-10 h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.07),transparent_65%)]"
       />
 
       <div className="mx-auto max-w-[1200px] px-6 py-24 sm:py-32">

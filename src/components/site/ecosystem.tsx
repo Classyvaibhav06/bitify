@@ -89,9 +89,10 @@ export function Ecosystem() {
       aria-label="Cross-platform ecosystem"
       className="relative overflow-hidden border-t border-white/[0.05]"
     >
+      {/* ambient — soft radial wash, no blur filter (cheaper on mobile) */}
       <div
         aria-hidden
-        className="absolute left-[-12%] bottom-[8%] -z-10 h-[420px] w-[420px] rounded-full bg-crimson/[0.05] blur-[110px]"
+        className="absolute left-[-12%] bottom-[8%] -z-10 h-[420px] w-[420px] rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.05),transparent_65%)]"
       />
 
       <div className="mx-auto max-w-[1200px] px-6 py-28 sm:py-36">

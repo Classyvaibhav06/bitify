@@ -61,9 +61,10 @@ export function Features() {
       aria-label="Features"
       className="relative overflow-hidden border-t border-white/[0.05]"
     >
+      {/* ambient — soft radial wash, no blur filter (cheaper on mobile) */}
       <div
         aria-hidden
-        className="absolute right-[-8%] top-[30%] -z-10 h-[420px] w-[420px] rounded-full bg-violet-glow/[0.05] blur-[110px]"
+        className="absolute right-[-8%] top-[30%] -z-10 h-[420px] w-[420px] rounded-full bg-[radial-gradient(ellipse,rgba(139,92,246,0.05),transparent_65%)]"
       />
 
       <div className="mx-auto max-w-[1200px] px-6 py-28 sm:py-36">
