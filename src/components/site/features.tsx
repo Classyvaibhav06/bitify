@@ -123,10 +123,10 @@ export function Features() {
             <div ref={shotRef} className="relative">
               <motion.div style={reduce ? undefined : { y: shotY }}>
                 <WindowFrame>
-                  <div className="relative aspect-[1405/931]">
+                  <div className="relative aspect-[1600/897]">
                     <Image
-                      src={SCREENSHOTS.desktop.lyrics}
-                      alt="Bitify Music — Now Playing view with album artwork and word-synced lyrics"
+                      src={SCREENSHOTS.tv.spotlight}
+                      alt="Bitify Music — Now Playing with word-synced lyrics, the current line glowing as the song plays"
                       fill
                       sizes="(max-width: 1024px) 92vw, 58vw"
                       className="object-cover"

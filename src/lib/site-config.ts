@@ -14,6 +14,11 @@
  *                            own physical bezels — presented directly.
  * tv-*.webp                  Raw 16:9 TV screen captures (used where a
  *                            synthetic TV frame is still appropriate).
+ * tv-lyrics/upnext/singalong  Real TV app captures (Lyrics, Up Next and
+ * -real.webp                  Sing Along views) framed with a baked bezel
+ *                            matching the product-photography cutouts.
+ * tv-lyrics-spotlight.webp    Clean bezel-free Lyrics capture for the
+ *                            Features “centrepiece” spotlight.
  * desktop-*.webp             Desktop app window screenshots (shown inside the
  *                            monitor mockup / window frame).
  * promo-*.webp               Official promotional artwork (provided brand assets)
@@ -144,6 +149,8 @@ export const SCREENSHOTS = {
   tv: {
     nowplaying: "/assets/tv/tv-nowplaying.webp",
     fullscreen: "/assets/tv/tv-fullscreen.webp",
+    /** bezel-free Lyrics capture shown in the Features “centrepiece” */
+    spotlight: "/assets/tv/tv-lyrics-spotlight.webp",
   },
   promo: {
     warm: "/assets/promo/promo-lyrics-warm.webp",
@@ -291,5 +298,26 @@ export const TV_SHOTS: Record<string, DeviceShot> = {
     height: 925,
     label: "Fullscreen",
     alt: "Bitify Music on TV — fullscreen Now Playing view",
+  },
+  lyrics: {
+    src: "/assets/tv/tv-lyrics-real.webp",
+    width: 1636,
+    height: 939,
+    label: "Lyrics",
+    alt: "Bitify Music on TV — Now Playing with word-synced lyrics for Kill Bill by SZA",
+  },
+  singalong: {
+    src: "/assets/tv/tv-singalong-real.webp",
+    width: 1636,
+    height: 939,
+    label: "Sing Along",
+    alt: "Bitify Music on TV — karaoke-style Sing Along lyrics for PRIDE. by Kendrick Lamar",
+  },
+  upnext: {
+    src: "/assets/tv/tv-upnext-real.webp",
+    width: 1636,
+    height: 951,
+    label: "Up Next",
+    alt: "Bitify Music on TV — Up Next queue with shuffle, repeat and autoplay",
   },
 };

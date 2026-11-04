@@ -11,7 +11,14 @@ import { cn } from "@/lib/utils";
 import { useHydrated } from "@/lib/use-hydrated";
 import { selectPlatform } from "@/lib/platform-events";
 
-const VIEWS: DeviceShot[] = [TV_SHOTS.nowplaying, TV_SHOTS.fullscreen];
+/** the five real TV app views, ordered as a guided tour of the screen */
+const VIEWS: DeviceShot[] = [
+  TV_SHOTS.nowplaying,
+  TV_SHOTS.lyrics,
+  TV_SHOTS.singalong,
+  TV_SHOTS.upnext,
+  TV_SHOTS.fullscreen,
+];
 
 const easeOut = [0.21, 0.47, 0.32, 0.98] as const;
 
