@@ -4,7 +4,7 @@ import { useRef, type CSSProperties } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, MonitorSmartphone } from "lucide-react";
 import { Equalizer } from "./equalizer";
-import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
+import { LaptopPhoto } from "./devices/laptop-photo";
 import { DeviceShotImage } from "./devices/device-shot";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { MOBILE_SCREENS, TV_SHOTS, DOWNLOADS } from "@/lib/site-config";
@@ -152,9 +152,11 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* laptop — the hero device: photoreal studio render, front-right,
-              angled to face the headline. The projected laptop fills ~66% of
-              the wrapper's width and ~80% of its height, centered. */}
+          {/* laptop — the hero device: the same photoreal studio render
+              as a pre-rendered bitmap (pixel-identical to the vector
+              version, but a single responsive image instead of ~420 DOM
+              nodes + SVG filters), front-right, angled to face the
+              headline. Fills ~66% of the wrapper's width, ~80% height. */}
           <motion.div
             style={reduce ? undefined : { y: laptopY }}
             className="pointer-events-none absolute bottom-[-6%] right-[-8%] w-[100%] sm:bottom-[-6%] sm:right-[-4%] sm:w-[88%] lg:bottom-[-8%] lg:right-[-2%] lg:w-[84%]"
@@ -171,7 +173,12 @@ export function Hero() {
                 {/* ambient pool — grounds the render, separates it
                     from the TV artwork behind */}
                 <div aria-hidden className="hero-laptop-amb" />
-                <StudioLaptopStage className="w-full" />
+                <LaptopPhoto
+                  pose="hero"
+                  priority
+                  sizes="(max-width: 640px) 90vw, 1080px"
+                  alt="Bitify Music desktop application — home view with library and player"
+                />
               </motion.div>
             </div>
           </motion.div>

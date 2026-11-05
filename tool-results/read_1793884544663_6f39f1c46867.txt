@@ -1,0 +1,865 @@
+     1→"use client";
+     2→
+     3→import React, { useId, useMemo, type ReactNode } from "react";
+     4→import {
+     5→  type CameraConfig,
+     6→  type Point2D,
+     7→  type Vec3,
+     8→  computeHomographyMatrix3d,
+     9→  pointsToSvgPath,
+    10→  projectPoint3D,
+    11→  sampleRoundedRect2D,
+    12→} from "./homography";
+    13→import {
+    14→  DECK_PIXEL_HEIGHT,
+    15→  DECK_PIXEL_WIDTH,
+    16→  LaptopKeyboardDeck,
+    17→} from "./keyboard-deck";
+    18→
+    19→/**
+    20→ * Studio laptop render — ported from the Gemini-authored Bitify laptop
+    21→ * render, adapted for the Bitify hero:
+    22→ *
+    23→ *  - The screen now carries the REAL Bitify desktop screenshot
+    24→ *    (`desktop-hero.webp`, 1403 x 930, ratio 1.5086). The physical
+    25→ *    screen aperture and the lid height were re-derived so the
+    26→ *    screenshot maps onto the display with ZERO crop, stretch or
+    27→ *    letterboxing, while keeping realistic slim bezels.
+    28→ *  - The side ports are drawn on the wall that actually faces the
+    29→ *    camera for negative yaw (the original drew them on the far
+    30→ *    wall, which made them float over the keyboard).
+    31→ *  - The camera viewport is recentered so the whole laptop sits
+    32→ *    dead-center inside the 1440 x 960 stage (predictable CSS sizing).
+    33→ *
+    34→ * The laptop is built from a real pinhole-camera projection: every
+    35→ * chassis edge, wall, hinge and shadow is a 3D point projected to 2D,
+    36→ * and the screen + keyboard deck are flat surfaces mapped on with
+    37→ * solved homography matrix3d transforms. The default pose faces the
+    38→ * viewer with a slight left bias — perfect for a right-hand hero
+    39→ * placement looking back at the headline. A second, dead-on FRONT
+    40→ * pose (via the `camera` prop) powers the desktop showcase section,
+    41→ * and `children` swaps the screen content (live video / tab views).
+    42→ */
+    43→
+    44→/* Real screenshot pixel size — the screen div is exactly this big so
+    45→ * the image maps 1:1 onto the projected screen quad. */
+    46→export const SCREEN_PIXEL_WIDTH = 1403;
+    47→export const SCREEN_PIXEL_HEIGHT = 930;
+    48→const SCREEN_SRC = "/assets/desktop/desktop-hero.webp";
+    49→
+    50→export const STAGE_WIDTH = 1440;
+    51→export const STAGE_HEIGHT = 960;
+    52→
+    53→const KEY_LIGHT = 1.0;
+    54→const CRIMSON_RIM = 1.0;
+    55→const SCREEN_BRIGHTNESS = 1.02;
+    56→const SHADOW_INTENSITY = 1.0;
+    57→
+    58→/* Fixed hero pose — three-quarter view, deck front angled toward the
+    59→ * lower-left, screen normal facing slightly left (toward the copy).
+    60→ * Hand-tuned so the projected laptop (incl. contact shadow) is
+    61→ * horizontally and vertically centered in the 1440x960 stage. */
+    62→export const HERO_CAMERA: CameraConfig = {
+    63→  yawDeg: -19.5,
+    64→  pitchDeg: 17.5,
+    65→  lidAngleDeg: 102.5,
+    66→  distance: 1060,
+    67→  focalLength: 2280,
+    68→  target: { x: -8, y: 60, z: 98 },
+    69→  viewportCenter: { x: 726.35, y: 517.05 },
+    70→};
+    71→
+    72→/* Front-facing product pose — dead-on and perfectly symmetric (yaw 0),
+    73→ * pitch 16° still reveals the keyboard deck below the screen. Derived
+    74→ * by projecting the full chassis + contact-shadow bounding box and
+    75→ * solving the focal length + viewport centre that centres it in the
+    76→ * 1440x960 stage: the laptop fills ~79% of the width and ~92% of the
+    77→ * height — a touch larger than the hero crop, with just enough margin
+    78→ * for the contact-shadow blur to breathe. */
+    79→export const FRONT_CAMERA: CameraConfig = {
+    80→  yawDeg: 0,
+    81→  pitchDeg: 16,
+    82→  lidAngleDeg: 102.5,
+    83→  distance: 1060,
+    84→  focalLength: 2825.9,
+    85→  target: { x: 0, y: 60, z: 98 },
+    86→  viewportCenter: { x: 720.0, y: 562.83 },
+    87→};
+    88→
+    89→export const StudioLaptopRender: React.FC<{
+    90→  /** Camera pose — defaults to the hero three-quarter view. */
+    91→  camera?: CameraConfig;
+    92→  /**
+    93→   * Optional screen content, rendered inside the projected display
+    94→   * aperture (a 1403x930 surface homography-mapped onto the screen
+    95→   * quad) in place of the default hero screenshot. Fill it with
+    96→   * absolutely-positioned media (video / next-image) — it inherits
+    97→   * the laptop's perspective exactly.
+    98→   */
+    99→  children?: ReactNode;
+   100→}> = ({ camera = HERO_CAMERA, children }) => {
+   101→  const cam = camera;
+   102→  /* Unique SVG def ids per instance — the page mounts this laptop
+   103→   * twice (hero + desktop showcase) and duplicate filter/gradient
+   104→   * ids would collide across the two SVGs. */
+   105→  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+   106→  const svgId = (name: string) => `sl-${uid}-${name}`;
+   107→
+   108→  // Physical dimensions in millimeter-scale 3D space
+   109→  const halfW = 178; // 356mm total width
+   110→  const deckDepth = 246; // 246mm deck depth
+   111→  // Lid tall enough for a 1403x930 (1.5086) screen with slim bezels:
+   112→  // screen 344.8 x 228.56 -> bottom bezel 8.2mm, top bezel 5.84mm
+   113→  const lidHeight = 242.6;
+   114→  const lidThickness = 5.0; // Slim 5.0mm anodized aluminum lid
+   115→  const baseWallBottomY = -10.8; // Vertical side wall bottom
+   116→  const basePanBottomY = -13.8; // Tapered lower chassis pan
+   117→
+   118→  // Convert display lid local coordinates (u, v, w) to 3D world space
+   119→  // u: [-halfW..+halfW], v: [0..lidHeight] along lid face, w: [-lidThickness..0] depth into back shell
+   120→  const lidPointToWorld = useMemo(() => {
+   121→    const tiltBackRad = ((cam.lidAngleDeg - 90) * Math.PI) / 180;
+   122→    const cosT = Math.cos(tiltBackRad);
+   123→    const sinT = Math.sin(tiltBackRad);
+   124→    const hingeY = 1.2;
+   125→    const hingeZ = 7.5;
+   126→
+   127→    return (u: number, v: number, w = 0): Vec3 => ({
+   128→      x: u,
+   129→      y: hingeY + v * cosT - w * sinT,
+   130→      z: hingeZ - v * sinT + w * cosT,
+   131→    });
+   132→  }, [cam]);
+   133→
+   134→  // 1. Compute 4 Projected Corners of the Active Display Screen Aperture
+   135→  // Physical screen aperture: u in [-172.4, +172.4] (344.8mm), v in [8.2, 236.76]
+   136→  // (228.56mm) -> exact 1403:930 = the real screenshot's native ratio
+   137→  const screenQuad = useMemo((): [Point2D, Point2D, Point2D, Point2D] => {
+   138→    const uMin = -172.4;
+   139→    const uMax = 172.4;
+   140→    const vBottom = 8.2;
+   141→    const vTop = 236.76;
+   142→
+   143→    const tl = projectPoint3D(lidPointToWorld(uMin, vTop, 0), cam);
+   144→    const tr = projectPoint3D(lidPointToWorld(uMax, vTop, 0), cam);
+   145→    const br = projectPoint3D(lidPointToWorld(uMax, vBottom, 0), cam);
+   146→    const bl = projectPoint3D(lidPointToWorld(uMin, vBottom, 0), cam);
+   147→    return [tl, tr, br, bl];
+   148→  }, [cam, lidPointToWorld]);
+   149→
+   150→  const screenMatrix3d = useMemo(
+   151→    () =>
+   152→      computeHomographyMatrix3d(
+   153→        SCREEN_PIXEL_WIDTH,
+   154→        SCREEN_PIXEL_HEIGHT,
+   155→        screenQuad
+   156→      ),
+   157→    [screenQuad]
+   158→  );
+   159→
+   160→  // 2. Compute 4 Projected Corners of the Top Keyboard Deck Plane (Y = 0)
+   161→  const deckQuad = useMemo((): [Point2D, Point2D, Point2D, Point2D] => {
+   162→    const tl = projectPoint3D({ x: -halfW, y: 0, z: 0 }, cam);
+   163→    const tr = projectPoint3D({ x: halfW, y: 0, z: 0 }, cam);
+   164→    const br = projectPoint3D({ x: halfW, y: 0, z: deckDepth }, cam);
+   165→    const bl = projectPoint3D({ x: -halfW, y: 0, z: deckDepth }, cam);
+   166→    return [tl, tr, br, bl];
+   167→  }, [cam, halfW, deckDepth]);
+   168→
+   169→  const deckMatrix3d = useMemo(
+   170→    () => computeHomographyMatrix3d(DECK_PIXEL_WIDTH, DECK_PIXEL_HEIGHT, deckQuad),
+   171→    [deckQuad]
+   172→  );
+   173→
+   174→  // 3. Sample 3D Rounded Contours for Lid, Screen Bezel, Deck, Lower Chassis, and Shadows
+   175→  const geometryPaths = useMemo(() => {
+   176→    // Lid 2D local rounded contour (note: in 2D sampling yMin is bottom v=0, yMax is top v=lidHeight)
+   177→    const lidContourLocal = sampleRoundedRect2D(
+   178→      -halfW,
+   179→      halfW,
+   180→      0,
+   181→      lidHeight,
+   182→      [5, 5, 11.5, 11.5],
+   183→      12
+   184→    );
+   185→
+   186→    const lidFrontPts = lidContourLocal.map((p) =>
+   187→      projectPoint3D(lidPointToWorld(p.x, p.y, 0), cam)
+   188→    );
+   189→    const lidBackPts = lidContourLocal.map((p) =>
+   190→      projectPoint3D(lidPointToWorld(p.x, p.y, -lidThickness), cam)
+   191→    );
+   192→
+   193→    // Lid inner bezel step (1.5mm inset)
+   194→    const lidInnerPts = sampleRoundedRect2D(
+   195→      -halfW + 1.6,
+   196→      halfW - 1.6,
+   197→      1.4,
+   198→      lidHeight - 1.6,
+   199→      [4, 4, 10, 10],
+   200→      10
+   201→    ).map((p) => projectPoint3D(lidPointToWorld(p.x, p.y, 0), cam));
+   202→
+   203→    // Build 3D extruded rim quads between lidBackPts and lidFrontPts
+   204→    const lidRimSegments: {
+   205→      d: string;
+   206→      color: string;
+   207→      isTopKeyLight: boolean;
+   208→      isCrimsonRim: boolean;
+   209→    }[] = [];
+   210→
+   211→    for (let i = 0; i < lidFrontPts.length; i++) {
+   212→      const next = (i + 1) % lidFrontPts.length;
+   213→      const pL1 = lidContourLocal[i];
+   214→      const pL2 = lidContourLocal[next];
+   215→      const midU = (pL1.x + pL2.x) * 0.5;
+   216→      const midV = (pL1.y + pL2.y) * 0.5;
+   217→
+   218→      const isTop = midV > lidHeight - 14;
+   219→      const isRightSide = midU > halfW - 14;
+   220→      const isLeftSide = midU < -halfW + 14;
+   221→
+   222→      let fill = "#16161B";
+   223→      if (isTop) {
+   224→        fill = "#383436"; // Warm-white key light grazing upper edge
+   225→      } else if (isRightSide || isLeftSide) {
+   226→        fill = "#2A1720"; // Subtle crimson rim light along outer edges
+   227→      }
+   228→
+   229→      const segPath = pointsToSvgPath(
+   230→        [lidBackPts[i], lidBackPts[next], lidFrontPts[next], lidFrontPts[i]],
+   231→        true
+   232→      );
+   233→      lidRimSegments.push({
+   234→        d: segPath,
+   235→        color: fill,
+   236→        isTopKeyLight: isTop,
+   237→        isCrimsonRim: isRightSide || isLeftSide,
+   238→      });
+   239→    }
+   240→
+   241→    // Top camera notch/sensor coordinates on upper bezel
+   242→    const camCenter = projectPoint3D(
+   243→      lidPointToWorld(0, lidHeight - 3.8, 0),
+   244→      cam
+   245→    );
+   246→    const camSensorLeft = projectPoint3D(
+   247→      lidPointToWorld(-4.5, lidHeight - 3.8, 0),
+   248→      cam
+   249→    );
+   250→
+   251→    // Cylindrical hinge barrel between (X in [-132, +132])
+   252→    const hingeTopLeft = projectPoint3D({ x: -134, y: 4.2, z: 6.5 }, cam);
+   253→    const hingeTopRight = projectPoint3D({ x: 134, y: 4.2, z: 6.5 }, cam);
+   254→    const hingeBotRight = projectPoint3D({ x: 134, y: -1.2, z: 11.5 }, cam);
+   255→    const hingeBotLeft = projectPoint3D({ x: -134, y: -1.2, z: 11.5 }, cam);
+   256→    const hingePath = pointsToSvgPath([
+   257→      hingeTopLeft,
+   258→      hingeTopRight,
+   259→      hingeBotRight,
+   260→      hingeBotLeft,
+   261→    ]);
+   262→
+   263→    // Deck 2D local contour: X in [-halfW..+halfW], Z in [0..deckDepth]
+   264→    const deckContourLocal = sampleRoundedRect2D(
+   265→      -halfW,
+   266→      halfW,
+   267→      0,
+   268→      deckDepth,
+   269→      [11, 11, 13.5, 13.5],
+   270→      14
+   271→    );
+   272→
+   273→    const deckTopPts = deckContourLocal.map((p) =>
+   274→      projectPoint3D({ x: p.x, y: 0, z: p.y }, cam)
+   275→    );
+   276→    const deckMidPts = deckContourLocal.map((p) =>
+   277→      projectPoint3D({ x: p.x, y: baseWallBottomY, z: p.y }, cam)
+   278→    );
+   279→
+   280→    // Inset tapered lower pan contour
+   281→    const panContourLocal = sampleRoundedRect2D(
+   282→      -halfW + 5.5,
+   283→      halfW - 5.5,
+   284→      5.5,
+   285→      deckDepth - 5.5,
+   286→      [10, 10, 12, 12],
+   287→      12
+   288→    );
+   289→    const deckPanPts = panContourLocal.map((p) =>
+   290→      projectPoint3D({ x: p.x, y: basePanBottomY, z: p.y }, cam)
+   291→    );
+   292→
+   293→    // Build 3D vertical wall segments around the unibody deck perimeter
+   294→    const deckWallSegments: { d: string; fill: string }[] = [];
+   295→    for (let i = 0; i < deckTopPts.length; i++) {
+   296→      const next = (i + 1) % deckTopPts.length;
+   297→      const c1 = deckContourLocal[i];
+   298→      const c2 = deckContourLocal[next];
+   299→
+   300→      // Outward 2D normal in (X, Z) plane
+   301→      const dx = c2.x - c1.x;
+   302→      const dz = c2.y - c1.y;
+   303→      const len = Math.hypot(dx, dz) || 1;
+   304→      const nx = dz / len;
+   305→      const nz = -dx / len;
+   306→
+   307→      // Shade based on normal orientation (front lip vs left/right side walls vs corner curve)
+   308→      let r = 20;
+   309→      let g = 20;
+   310→      let b = 25;
+   311→
+   312→      // Front-facing lip receives soft warm studio fill
+   313→      if (nz > 0.4) {
+   314→        const frontFactor = (nz - 0.4) / 0.6;
+   315→        r += Math.round(frontFactor * 14 * KEY_LIGHT);
+   316→        g += Math.round(frontFactor * 13 * KEY_LIGHT);
+   317→        b += Math.round(frontFactor * 15 * KEY_LIGHT);
+   318→      }
+   319→
+   320→      // Corner specular catchlight where side wall curves into front lip
+   321→      const cornerHighlight = Math.max(0, 1 - Math.abs(Math.abs(nx) - 0.7) * 3.2);
+   322→      if (nz > 0) {
+   323→        r += Math.round(cornerHighlight * 28 * KEY_LIGHT);
+   324→        g += Math.round(cornerHighlight * 25 * KEY_LIGHT);
+   325→        b += Math.round(cornerHighlight * 27 * KEY_LIGHT);
+   326→      }
+   327→
+   328→      // Crimson rim light along outer side edges
+   329→      if (Math.abs(nx) > 0.55) {
+   330→        r += Math.round(24 * CRIMSON_RIM);
+   331→        g += Math.round(4 * CRIMSON_RIM);
+   332→        b += Math.round(10 * CRIMSON_RIM);
+   333→      }
+   334→
+   335→      const segPath = pointsToSvgPath([
+   336→        deckTopPts[i],
+   337→        deckTopPts[next],
+   338→        deckMidPts[next],
+   339→        deckMidPts[i],
+   340→      ]);
+   341→      deckWallSegments.push({
+   342→        d: segPath,
+   343→        fill: `rgb(${Math.min(255, r)}, ${Math.min(255, g)}, ${Math.min(255, b)})`,
+   344→      });
+   345→    }
+   346→
+   347→    // Build tapered lower bevel segments between deckMidPts and deckPanPts
+   348→    const lowerChamferPoly = pointsToSvgPath(deckMidPts);
+   349→    const lowerPanPoly = pointsToSvgPath(deckPanPts);
+   350→
+   351→    // Front lip ergonomic CNC thumb notch (X in [-27, +27], Z = deckDepth, Y in [-4.4, 0])
+   352→    const notchPts = [
+   353→      projectPoint3D({ x: -27, y: 0, z: deckDepth }, cam),
+   354→      projectPoint3D({ x: 27, y: 0, z: deckDepth }, cam),
+   355→      projectPoint3D({ x: 24.5, y: -4.4, z: deckDepth }, cam),
+   356→      projectPoint3D({ x: -24.5, y: -4.4, z: deckDepth }, cam),
+   357→    ];
+   358→    const notchBottomRim = [
+   359→      projectPoint3D({ x: -24.5, y: -4.4, z: deckDepth }, cam),
+   360→      projectPoint3D({ x: 24.5, y: -4.4, z: deckDepth }, cam),
+   361→    ];
+   362→
+   363→    // Side ports on the wall that FACES the camera:
+   364→    // with negative yaw the camera sits at +X, so the +halfW wall is
+   365→    // visible. Dead-on (|yaw| < 3°) both side walls are edge-on — the
+   366→    // port cutouts would collapse to zero-width slivers, so they are
+   367→    // omitted entirely for the front pose.
+   368→    const sideX = cam.yawDeg <= 0 ? halfW : -halfW;
+   369→    const makeSidePort = (zStart: number, zEnd: number, yTop: number, yBot: number) =>
+   370→      pointsToSvgPath([
+   371→        projectPoint3D({ x: sideX, y: yTop, z: zStart }, cam),
+   372→        projectPoint3D({ x: sideX, y: yTop, z: zEnd }, cam),
+   373→        projectPoint3D({ x: sideX, y: yBot, z: zEnd }, cam),
+   374→        projectPoint3D({ x: sideX, y: yBot, z: zStart }, cam),
+   375→      ]);
+   376→
+   377→    const sidePorts =
+   378→      Math.abs(cam.yawDeg) < 3
+   379→        ? []
+   380→        : [
+   381→            // MagSafe 3 Port
+   382→            { d: makeSidePort(28, 46, -2.8, -7.6), isMagSafe: true },
+   383→            // Thunderbolt / USB-C Port 1
+   384→            { d: makeSidePort(58, 71, -3.4, -7.2), isMagSafe: false },
+   385→            // Thunderbolt / USB-C Port 2
+   386→            { d: makeSidePort(82, 95, -3.4, -7.2), isMagSafe: false },
+   387→            // 3.5mm Studio Audio Jack
+   388→            { d: makeSidePort(110, 116, -3.8, -7.0), isMagSafe: false },
+   389→          ];
+   390→
+   391→    // Four Rubber Feet underneath the chassis corners + their tight contact shadows
+   392→    const footConfigs = [
+   393→      { x: -halfW + 26, z: 26, r: 12 },
+   394→      { x: halfW - 26, z: 26, r: 12 },
+   395→      { x: -halfW + 26, z: deckDepth - 26, r: 12 },
+   396→      { x: halfW - 26, z: deckDepth - 26, r: 12 },
+   397→    ];
+   398→
+   399→    const rubberFeet = footConfigs.map((fc) => {
+   400→      const topLoop: Point2D[] = [];
+   401→      const botLoop: Point2D[] = [];
+   402→      const shadowLoop: Point2D[] = [];
+   403→      const steps = 16;
+   404→      for (let i = 0; i < steps; i++) {
+   405→        const a = (i / steps) * Math.PI * 2;
+   406→        const px = fc.x + Math.cos(a) * fc.r;
+   407→        const pz = fc.z + Math.sin(a) * fc.r;
+   408→        topLoop.push(projectPoint3D({ x: px, y: basePanBottomY + 0.5, z: pz }, cam));
+   409→        botLoop.push(projectPoint3D({ x: px, y: basePanBottomY - 2.2, z: pz }, cam));
+   410→        shadowLoop.push(
+   411→          projectPoint3D(
+   412→            {
+   413→              x: fc.x + Math.cos(a) * (fc.r * 1.45),
+   414→              y: basePanBottomY - 2.5,
+   415→              z: fc.z + Math.sin(a) * (fc.r * 1.45),
+   416→            },
+   417→            cam
+   418→          )
+   419→        );
+   420→      }
+   421→      return {
+   422→        footPath: pointsToSvgPath(botLoop),
+   423→        shadowPath: pointsToSvgPath(shadowLoop),
+   424→      };
+   425→    });
+   426→
+   427→    // Studio Contact Shadows on the ground plane (Y = basePanBottomY - 2.6)
+   428→    // Kept tight and natural directly beneath the laptop chassis
+   429→    const shadowOuterPts = sampleRoundedRect2D(
+   430→      -halfW - 10,
+   431→      halfW + 10,
+   432→      -8,
+   433→      deckDepth + 10,
+   434→      [22, 22, 26, 26],
+   435→      12
+   436→    ).map((p) =>
+   437→      projectPoint3D({ x: p.x, y: basePanBottomY - 2.8, z: p.y }, cam)
+   438→    );
+   439→
+   440→    const shadowCorePts = sampleRoundedRect2D(
+   441→      -halfW + 4,
+   442→      halfW - 4,
+   443→      4,
+   444→      deckDepth - 2,
+   445→      [14, 14, 16, 16],
+   446→      12
+   447→    ).map((p) =>
+   448→      projectPoint3D({ x: p.x, y: basePanBottomY - 2.4, z: p.y }, cam)
+   449→    );
+   450→
+   451→    // Upper display lid warm-white key light highlight path
+   452→    const topKeyLightPts: Point2D[] = [];
+   453→    for (let u = -halfW + 10; u <= halfW - 10; u += 12) {
+   454→      topKeyLightPts.push(
+   455→        projectPoint3D(lidPointToWorld(u, lidHeight - 0.4, -0.5), cam)
+   456→      );
+   457→    }
+   458→
+   459→    // Outer display lid crimson rim highlight paths
+   460→    const rightCrimsonRimPts: Point2D[] = [];
+   461→    for (let v = 10; v <= lidHeight - 10; v += 12) {
+   462→      rightCrimsonRimPts.push(
+   463→        projectPoint3D(lidPointToWorld(halfW - 0.3, v, -0.8), cam)
+   464→      );
+   465→    }
+   466→
+   467→    const leftCrimsonRimPts: Point2D[] = [];
+   468→    for (let v = 10; v <= lidHeight - 10; v += 12) {
+   469→      leftCrimsonRimPts.push(
+   470→        projectPoint3D(lidPointToWorld(-halfW + 0.3, v, -0.8), cam)
+   471→      );
+   472→    }
+   473→
+   474→    return {
+   475→      lidFrontPath: pointsToSvgPath(lidFrontPts),
+   476→      lidBackPath: pointsToSvgPath(lidBackPts),
+   477→      lidInnerPath: pointsToSvgPath(lidInnerPts),
+   478→      lidRimSegments,
+   479→      camCenter,
+   480→      camSensorLeft,
+   481→      hingePath,
+   482→      deckTopPath: pointsToSvgPath(deckTopPts),
+   483→      deckMidPath: lowerChamferPoly,
+   484→      deckPanPath: lowerPanPoly,
+   485→      deckWallSegments,
+   486→      notchPath: pointsToSvgPath(notchPts),
+   487→      notchBottomRim,
+   488→      sidePorts,
+   489→      rubberFeet,
+   490→      shadowOuterPath: pointsToSvgPath(shadowOuterPts),
+   491→      shadowCorePath: pointsToSvgPath(shadowCorePts),
+   492→      topKeyLightPath: pointsToSvgPath(topKeyLightPts, false),
+   493→      rightCrimsonRimPath: pointsToSvgPath(rightCrimsonRimPts, false),
+   494→      leftCrimsonRimPath: pointsToSvgPath(leftCrimsonRimPts, false),
+   495→    };
+   496→  }, [
+   497→    cam,
+   498→    halfW,
+   499→    lidHeight,
+   500→    lidThickness,
+   501→    deckDepth,
+   502→    baseWallBottomY,
+   503→    basePanBottomY,
+   504→    lidPointToWorld,
+   505→  ]);
+   506→
+   507→  return (
+   508→    <div
+   509→      style={{
+   510→        width: `${STAGE_WIDTH}px`,
+   511→        height: `${STAGE_HEIGHT}px`,
+   512→        background: "transparent",
+   513→      }}
+   514→      className="relative select-none overflow-visible"
+   515→    >
+   516→      {/* LAYER 1: STUDIO CONTACT SHADOWS, LOWER CHASSIS BASE, AND 3D DISPLAY LID FRAME */}
+   517→      <svg
+   518→        width={STAGE_WIDTH}
+   519→        height={STAGE_HEIGHT}
+   520→        viewBox={`0 0 ${STAGE_WIDTH} ${STAGE_HEIGHT}`}
+   521→        className="pointer-events-none absolute inset-0 overflow-visible"
+   522→      >
+   523→        <defs>
+   524→          {/* Tight Natural Studio Contact Shadow Blur */}
+   525→          <filter id={svgId("contact-shadow-outer")}
+   526→            x="-20%"
+   527→            y="-20%"
+   528→            width="140%"
+   529→            height="140%"
+   530→          >
+   531→            <feGaussianBlur stdDeviation="22" />
+   532→          </filter>
+   533→          <filter id={svgId("contact-shadow-core")}
+   534→            x="-15%"
+   535→            y="-15%"
+   536→            width="130%"
+   537→            height="130%"
+   538→          >
+   539→            <feGaussianBlur stdDeviation="9" />
+   540→          </filter>
+   541→          <filter id={svgId("foot-shadow-blur")}
+   542→            x="-30%"
+   543→            y="-30%"
+   544→            width="160%"
+   545→            height="160%"
+   546→          >
+   547→            <feGaussianBlur stdDeviation="3.5" />
+   548→          </filter>
+   549→          <filter id={svgId("rim-glow-soft")} x="-20%" y="-20%" width="140%" height="140%">
+   550→            <feGaussianBlur stdDeviation="1.6" />
+   551→          </filter>
+   552→
+   553→          {/* Matte-Black Anodized Display Lid Front Bezel Gradient */}
+   554→          <linearGradient id={svgId("lid-bezel-grad")} x1="0%" y1="0%" x2="100%" y2="100%">
+   555→            <stop offset="0%" stopColor="#1B1B21" />
+   556→            <stop offset="35%" stopColor="#111116" />
+   557→            <stop offset="75%" stopColor="#0C0C10" />
+   558→            <stop offset="100%" stopColor="#171217" />
+   559→          </linearGradient>
+   560→
+   561→          {/* Display Glass Inner Frame Gradient */}
+   562→          <linearGradient id={svgId("lid-glass-grad")} x1="0%" y1="0%" x2="100%" y2="100%">
+   563→            <stop offset="0%" stopColor="#0E0E12" />
+   564→            <stop offset="50%" stopColor="#08080B" />
+   565→            <stop offset="100%" stopColor="#0C0A0E" />
+   566→          </linearGradient>
+   567→
+   568→          {/* Warm-White Studio Key Light Edge Gradient */}
+   569→          <linearGradient id={svgId("warm-key-light")} x1="0%" y1="0%" x2="100%" y2="0%">
+   570→            <stop offset="0%" stopColor="rgba(255, 247, 237, 0.15)" />
+   571→            <stop offset="28%" stopColor="rgba(254, 243, 199, 0.85)" />
+   572→            <stop offset="65%" stopColor="rgba(255, 250, 245, 0.9)" />
+   573→            <stop offset="100%" stopColor="rgba(244, 63, 94, 0.55)" />
+   574→          </linearGradient>
+   575→
+   576→          {/* Subtle Crimson Rim Light Gradient */}
+   577→          <linearGradient id={svgId("crimson-rim-light")} x1="0%" y1="0%" x2="0%" y2="100%">
+   578→            <stop offset="0%" stopColor="rgba(251, 113, 133, 0.78)" />
+   579→            <stop offset="50%" stopColor="rgba(225, 29, 72, 0.88)" />
+   580→            <stop offset="100%" stopColor="rgba(159, 18, 57, 0.25)" />
+   581→          </linearGradient>
+   582→
+   583→          {/* Lower Base Tapered Pan Gradient */}
+   584→          <linearGradient id={svgId("base-pan-grad")} x1="0%" y1="0%" x2="100%" y2="0%">
+   585→            <stop offset="0%" stopColor="#09090C" />
+   586→            <stop offset="48%" stopColor="#121217" />
+   587→            <stop offset="85%" stopColor="#0B0B0E" />
+   588→            <stop offset="100%" stopColor="#191015" />
+   589→          </linearGradient>
+   590→
+   591→          {/* Cylindrical Hinge Gradient */}
+   592→          <linearGradient id={svgId("hinge-barrel-grad")} x1="0%" y1="0%" x2="0%" y2="100%">
+   593→            <stop offset="0%" stopColor="#26262E" />
+   594→            <stop offset="40%" stopColor="#121217" />
+   595→            <stop offset="100%" stopColor="#060608" />
+   596→          </linearGradient>
+   597→        </defs>
+   598→
+   599→        {/* 1. NATURAL STUDIO CONTACT SHADOWS BENEATH LAPTOP */}
+   600→        <g opacity={SHADOW_INTENSITY}>
+   601→          <path
+   602→            d={geometryPaths.shadowOuterPath}
+   603→            fill="rgba(0, 0, 0, 0.48)"
+   604→            filter={`url(#${svgId("contact-shadow-outer")})`}
+   605→          />
+   606→          <path
+   607→            d={geometryPaths.shadowCorePath}
+   608→            fill="rgba(0, 0, 0, 0.76)"
+   609→            filter={`url(#${svgId("contact-shadow-core")})`}
+   610→          />
+   611→          {geometryPaths.rubberFeet.map((rf, i) => (
+   612→            <path
+   613→              key={`fsh-${i}`}
+   614→              d={rf.shadowPath}
+   615→              fill="rgba(0, 0, 0, 0.88)"
+   616→              filter={`url(#${svgId("foot-shadow-blur")})`}
+   617→            />
+   618→          ))}
+   619→        </g>
+   620→
+   621→        {/* 2. FOUR LOW-PROFILE MATTE RUBBER FEET */}
+   622→        {geometryPaths.rubberFeet.map((rf, i) => (
+   623→          <path
+   624→            key={`foot-${i}`}
+   625→            d={rf.footPath}
+   626→            fill="#070709"
+   627→            stroke="rgba(255,255,255,0.06)"
+   628→            strokeWidth="0.7"
+   629→          />
+   630→        ))}
+   631→
+   632→        {/* 3. LOWER CHASSIS TAPERED BELLY PAN (Underneath the vertical deck walls) */}
+   633→        <path
+   634→          d={geometryPaths.deckPanPath}
+   635→          fill={`url(#${svgId("base-pan-grad")})`}
+   636→          stroke="rgba(255,255,255,0.05)"
+   637→          strokeWidth="0.8"
+   638→        />
+   639→        <path
+   640→          d={geometryPaths.deckMidPath}
+   641→          fill={`url(#${svgId("base-pan-grad")})`}
+   642→          stroke="rgba(0,0,0,0.8)"
+   643→          strokeWidth="1"
+   644→        />
+   645→
+   646→        {/* 4. DISPLAY LID 3D EXTRUDED ALUMINUM THICKNESS RIM */}
+   647→        <path d={geometryPaths.lidBackPath} fill="#121216" />
+   648→        {geometryPaths.lidRimSegments.map((seg, idx) => (
+   649→          <path
+   650→            key={`lid-rim-${idx}`}
+   651→            d={seg.d}
+   652→            fill={seg.color}
+   653→            stroke={seg.color}
+   654→            strokeWidth="0.6"
+   655→          />
+   656→        ))}
+   657→
+   658→        {/* 5. DISPLAY LID FRONT ANODIZED ALUMINUM FRAME & GLASS BEZEL */}
+   659→        <path
+   660→          d={geometryPaths.lidFrontPath}
+   661→          fill={`url(#${svgId("lid-bezel-grad")})`}
+   662→          stroke="rgba(255, 250, 242, 0.22)"
+   663→          strokeWidth="1.1"
+   664→        />
+   665→        <path
+   666→          d={geometryPaths.lidInnerPath}
+   667→          fill={`url(#${svgId("lid-glass-grad")})`}
+   668→          stroke="rgba(255, 255, 255, 0.06)"
+   669→          strokeWidth="0.8"
+   670→        />
+   671→
+   672→        {/* 6. WARM-WHITE KEY LIGHT ALONG UPPER DISPLAY LID EDGE */}
+   673→        <path
+   674→          d={geometryPaths.topKeyLightPath}
+   675→          fill="none"
+   676→          stroke={`url(#${svgId("warm-key-light")})`}
+   677→          strokeWidth={2.2 * KEY_LIGHT}
+   678→          strokeLinecap="round"
+   679→          filter={`url(#${svgId("rim-glow-soft")})`}
+   680→          opacity={0.9 * KEY_LIGHT}
+   681→        />
+   682→
+   683→        {/* 7. SUBTLE CRIMSON RIM LIGHT ALONG OUTER DISPLAY EDGES */}
+   684→        <path
+   685→          d={geometryPaths.rightCrimsonRimPath}
+   686→          fill="none"
+   687→          stroke={`url(#${svgId("crimson-rim-light")})`}
+   688→          strokeWidth={2.0 * CRIMSON_RIM}
+   689→          strokeLinecap="round"
+   690→          opacity={0.85 * CRIMSON_RIM}
+   691→        />
+   692→        <path
+   693→          d={geometryPaths.leftCrimsonRimPath}
+   694→          fill="none"
+   695→          stroke={`url(#${svgId("crimson-rim-light")})`}
+   696→          strokeWidth={1.6 * CRIMSON_RIM}
+   697→          strokeLinecap="round"
+   698→          opacity={0.7 * CRIMSON_RIM}
+   699→        />
+   700→
+   701→        {/* 8. BUILT-IN STUDIO CAMERA LENS & SENSOR IN TOP BEZEL */}
+   702→        <circle
+   703→          cx={geometryPaths.camCenter.x}
+   704→          cy={geometryPaths.camCenter.y}
+   705→          r="3.2"
+   706→          fill="#050507"
+   707→          stroke="rgba(255,255,255,0.16)"
+   708→          strokeWidth="0.7"
+   709→        />
+   710→        <circle
+   711→          cx={geometryPaths.camCenter.x - 0.6}
+   712→          cy={geometryPaths.camCenter.y - 0.6}
+   713→          r="1.1"
+   714→          fill="rgba(56, 189, 248, 0.45)"
+   715→        />
+   716→        <circle
+   717→          cx={geometryPaths.camSensorLeft.x}
+   718→          cy={geometryPaths.camSensorLeft.y}
+   719→          r="1.2"
+   720→          fill="rgba(52, 211, 153, 0.65)"
+   721→        />
+   722→      </svg>
+   723→
+   724→      {/* LAYER 2: REAL BITIFY DESKTOP SCREENSHOT PROJECTED ONTO THE LAPTOP SCREEN */}
+   725→      <div
+   726→        style={{
+   727→          width: `${SCREEN_PIXEL_WIDTH}px`,
+   728→          height: `${SCREEN_PIXEL_HEIGHT}px`,
+   729→          transformOrigin: "0 0",
+   730→          transform: screenMatrix3d,
+   731→          filter: `brightness(${SCREEN_BRIGHTNESS})`,
+   732→          borderRadius: "9px 9px 2px 2px",
+   733→          boxShadow: "0 0 0 1px rgba(255,255,255,0.07)",
+   734→        }}
+   735→        className="absolute top-0 left-0 overflow-hidden"
+   736→      >
+   737→        {/* Native-ratio screenshot: fills the aperture exactly — no
+   738→            crop, no stretch, no letterbox (aperture re-derived to
+   739→            match 1403x930). */}
+   740→        {children ? (
+   741→          /* Caller-supplied screen content (live video / tab views in
+   742→           * the desktop showcase) — fills the same projected aperture
+   743→           * and inherits the laptop's perspective. */
+   744→          <div className="absolute inset-0">{children}</div>
+   745→        ) : (
+   746→          <img
+   747→            src={SCREEN_SRC}
+   748→            alt="Bitify Music desktop application — home view with library and player"
+   749→            width={SCREEN_PIXEL_WIDTH}
+   750→            height={SCREEN_PIXEL_HEIGHT}
+   751→            draggable={false}
+   752→            fetchPriority="high"
+   753→            decoding="async"
+   754→            className="block h-full w-full select-none"
+   755→            style={{ objectFit: "fill" }}
+   756→          />
+   757→        )}
+   758→
+   759→        {/* Subtle Studio Display Glass Diagonal Reflection Overlay */}
+   760→        <div
+   761→          className="pointer-events-none absolute inset-0 z-30"
+   762→          style={{
+   763→            background:
+   764→              "linear-gradient(122deg, rgba(255, 250, 244, 0.048) 0%, rgba(255, 255, 255, 0.015) 34%, transparent 34.5%, transparent 100%)",
+   765→          }}
+   766→        />
+   767→      </div>
+   768→
+   769→      {/* LAYER 3: CYLINDRICAL HINGE & 3D EXTRUDED UNIBODY DECK SIDE WALLS */}
+   770→      <svg
+   771→        width={STAGE_WIDTH}
+   772→        height={STAGE_HEIGHT}
+   773→        viewBox={`0 0 ${STAGE_WIDTH} ${STAGE_HEIGHT}`}
+   774→        className="pointer-events-none absolute inset-0 overflow-visible"
+   775→      >
+   776→        {/* Cylindrical Anodized Hinge Barrel */}
+   777→        <path
+   778→          d={geometryPaths.hingePath}
+   779→          fill={`url(#${svgId("hinge-barrel-grad")})`}
+   780→          stroke="rgba(255,255,255,0.08)"
+   781→          strokeWidth="0.7"
+   782→        />
+   783→
+   784→        {/* Continuous 3D Extruded Unibody Side & Front Walls around Rounded Corners */}
+   785→        {geometryPaths.deckWallSegments.map((seg, idx) => (
+   786→          <path
+   787→            key={`deck-wall-${idx}`}
+   788→            d={seg.d}
+   789→            fill={seg.fill}
+   790→            stroke={seg.fill}
+   791→            strokeWidth="0.65"
+   792→          />
+   793→        ))}
+   794→
+   795→        {/* Base Top Surface Backing Plate */}
+   796→        <path d={geometryPaths.deckTopPath} fill="#15151A" />
+   797→      </svg>
+   798→
+   799→      {/* LAYER 4: PROJECTIVE 3D KEYBOARD & TRACKPAD DECK SURFACE */}
+   800→      <div
+   801→        style={{
+   802→          width: `${DECK_PIXEL_WIDTH}px`,
+   803→          height: `${DECK_PIXEL_HEIGHT}px`,
+   804→          transformOrigin: "0 0",
+   805→          transform: deckMatrix3d,
+   806→        }}
+   807→        className="pointer-events-none absolute top-0 left-0"
+   808→      >
+   809→        <LaptopKeyboardDeck
+   810→          keyLightIntensity={KEY_LIGHT}
+   811→          crimsonRimIntensity={CRIMSON_RIM}
+   812→        />
+   813→      </div>
+   814→
+   815→      {/* LAYER 5: FOREGROUND CNC THUMB NOTCH, SIDE PORTS & METALLIC EDGE HIGHLIGHTS */}
+   816→      <svg
+   817→        width={STAGE_WIDTH}
+   818→        height={STAGE_HEIGHT}
+   819→        viewBox={`0 0 ${STAGE_WIDTH} ${STAGE_HEIGHT}`}
+   820→        className="pointer-events-none absolute inset-0 overflow-visible"
+   821→      >
+   822→        {/* Side Port Cutouts (MagSafe 3, 2x Thunderbolt 4, 3.5mm Audio) */}
+   823→        {geometryPaths.sidePorts.map((port, idx) => (
+   824→          <path
+   825→            key={`port-${idx}`}
+   826→            d={port.d}
+   827→            fill="#050507"
+   828→            stroke={
+   829→              port.isMagSafe
+   830→                ? "rgba(255, 248, 235, 0.28)"
+   831→                : "rgba(225, 29, 72, 0.32)"
+   832→            }
+   833→            strokeWidth="0.85"
+   834→          />
+   835→        ))}
+   836→
+   837→        {/* Front Lip Ergonomic CNC Thumb Notch */}
+   838→        <path
+   839→          d={geometryPaths.notchPath}
+   840→          fill="#09090C"
+   841→          stroke="rgba(255,255,255,0.1)"
+   842→          strokeWidth="0.8"
+   843→        />
+   844→        <line
+   845→          x1={geometryPaths.notchBottomRim[0].x}
+   846→          y1={geometryPaths.notchBottomRim[0].y}
+   847→          x2={geometryPaths.notchBottomRim[1].x}
+   848→          y2={geometryPaths.notchBottomRim[1].y}
+   849→          stroke={`rgba(255, 247, 237, ${0.42 * KEY_LIGHT})`}
+   850→          strokeWidth="1.2"
+   851→          strokeLinecap="round"
+   852→        />
+   853→
+   854→        {/* Subtle Anodized Metallic Chamfer Outline Around Top Deck Perimeter */}
+   855→        <path
+   856→          d={geometryPaths.deckTopPath}
+   857→          fill="none"
+   858→          stroke={`rgba(255, 248, 238, ${0.22 * KEY_LIGHT})`}
+   859→          strokeWidth="1.0"
+   860→        />
+   861→      </svg>
+   862→    </div>
+   863→  );
+   864→};
+   865→

@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { StudioLaptopStage } from "./devices/studio-laptop/studio-laptop-stage";
-import { FRONT_CAMERA } from "./devices/studio-laptop/studio-laptop-render";
+import { LaptopPhoto } from "./devices/laptop-photo";
 import { Reveal } from "./reveal";
 import { DESKTOP_NAV_ITEMS, SCREENSHOTS } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -45,8 +44,12 @@ type ViewId = (typeof VIEWS)[number]["id"] | (typeof LIVE)["id"];
 
 /**
  * Real-time screen recording of the desktop app, looping silently.
- * Pauses whenever the laptop screen leaves the viewport or the tab
- * is hidden, so it never burns CPU/bandwidth in the background.
+ *
+ * The <video> itself only mounts once the section is within ~300px of
+ * the viewport (a lazy poster frame shows before that) — so opening
+ * the page never fetches or decodes the recording on phones. Once
+ * mounted it pauses whenever the laptop screen leaves the viewport or
+ * the tab is hidden, so it never burns CPU/bandwidth in the background.
  *
  * Lives inside the laptop's 1403x930 projected screen surface, which
  * the browser renders at ~45% scale — so badge metrics are authored
@@ -54,11 +57,31 @@ type ViewId = (typeof VIEWS)[number]["id"] | (typeof LIVE)["id"];
  * on the old monitor mockup.
  */
 function LiveNowPlayingVideo() {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [near, setNear] = useState(false);
 
+  /* mount gate — fires once, with margin, as the section approaches */
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setNear(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(wrap);
+    return () => io.disconnect();
+  }, []);
+
+  /* play/pause lifecycle for the mounted video */
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!near || !video) return;
 
     let inView = true;
 
@@ -90,25 +113,29 @@ function LiveNowPlayingVideo() {
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+  }, [near]);
 
   return (
-    <div className="absolute inset-0 bg-black">
-      <video
-        ref={videoRef}
-        src={LIVE.video}
-        className="h-full w-full select-none object-cover object-center"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        poster={LIVE.poster}
-        disablePictureInPicture
-        controlsList="nodownload"
-        draggable={false}
-        aria-label={LIVE.alt}
-      />
+    <div ref={wrapRef} className="absolute inset-0 bg-black">
+      {near ? (
+        /* the video's own poster attribute paints instantly on mount,
+           so no pre-mount fallback image is needed (keeps the recording
+           + poster entirely off the initial page load) */
+        <video
+          ref={videoRef}
+          src={LIVE.video}
+          className="h-full w-full select-none object-cover object-center"
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={LIVE.poster}
+          disablePictureInPicture
+          controlsList="nodownload"
+          draggable={false}
+          aria-label={LIVE.alt}
+        />
+      ) : null}
       {/* live badge — authored in laptop-screen pixels (1403px surface,
           rendered ~45% — matches the old monitor badge visually) */}
       <div
@@ -198,14 +225,19 @@ export function DesktopExperience() {
           </Reveal>
         </div>
 
-        {/* ---- laptop showcase — the same photoreal studio render as
-              the hero, posed dead-on (FRONT_CAMERA); the view switcher
-              drives its screen: live recording + real app views ---- */}
+        {/* ---- laptop showcase — the same photoreal studio laptop as
+              the hero, pre-rendered as a bitmap (dead-on product pose);
+              the view switcher still drives its screen — live recording
+              + real app views overlay the projected display aperture ---- */}
         <div className="relative">
           {/* ambient pool — grounds the render on the dark stage */}
           <div aria-hidden className="dl-amb" />
           <Reveal delay={0.05}>
-            <StudioLaptopStage camera={FRONT_CAMERA} className="w-full">
+            <LaptopPhoto
+              pose="front-blank"
+              sizes="(max-width: 1024px) 92vw, 700px"
+              alt="Bitify desktop app running inside the studio laptop"
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
@@ -223,14 +255,14 @@ export function DesktopExperience() {
                         src={current.src}
                         alt={current.alt}
                         fill
-                        sizes="(max-width: 1024px) 190px, 380px"
+                        sizes="(max-width: 1024px) 92vw, 700px"
                         className="object-cover object-center"
                       />
                     )
                   )}
                 </motion.div>
               </AnimatePresence>
-            </StudioLaptopStage>
+            </LaptopPhoto>
           </Reveal>
 
           {/* view switcher */}
