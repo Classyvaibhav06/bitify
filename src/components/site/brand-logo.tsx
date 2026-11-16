@@ -30,7 +30,7 @@ export function BrandLogo({ className, withEqualizer = false, withWordmark = fal
       {withWordmark && (
         <span
           aria-hidden="true"
-          className="font-display select-none text-[1.45rem] font-bold leading-none tracking-tight text-warm-white sm:text-[1.7rem]"
+          className="font-display select-none text-[1.2rem] font-bold leading-none tracking-tight text-warm-white sm:text-[1.35rem]"
         >
           Bitify
         </span>

@@ -64,7 +64,7 @@ export function Navbar() {
             className="group relative rounded-md"
             onClick={() => setOpen(false)}
           >
-            <BrandLogo priority withWordmark className="h-12 sm:h-[64px]" />
+            <BrandLogo priority withWordmark className="h-9 gap-2 sm:h-12 sm:gap-2.5" />
           </a>
 
           {/* desktop links */}
