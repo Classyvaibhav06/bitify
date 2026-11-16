@@ -1,0 +1,18 @@
+# Local dev / secrets
+.env*
+.git
+node_modules
+.next
+
+# Dev-only asset dumps & tooling (not referenced by the app)
+upload
+hero-shots
+verify-shots
+verification
+tool-results
+examples
+mini-services
+tests
+db
+.zscripts
+*.log

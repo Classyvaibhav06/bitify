@@ -11,8 +11,8 @@ interface BrandLogoProps {
 
 /**
  * Bitify Music brand lockup.
- * Uses the official brand asset (isolated on black by design; the page
- * background matches so the lockup blends seamlessly).
+ * Uses the official brand asset as a transparent-background PNG, so the
+ * white equalizer mark sits cleanly on the dark page background.
  */
 export function BrandLogo({ className, withEqualizer = false, priority }: BrandLogoProps) {
   return (
@@ -20,8 +20,8 @@ export function BrandLogo({ className, withEqualizer = false, priority }: BrandL
       <Image
         src="/assets/brand/bitify-logo.png"
         alt="Bitify Music"
-        width={802}
-        height={440}
+        width={598}
+        height={739}
         priority={priority}
         className="h-full w-auto select-none"
       />
