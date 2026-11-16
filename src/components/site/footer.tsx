@@ -105,7 +105,7 @@ export function Footer() {
             <p className="text-xs leading-relaxed text-muted-warm">
               Designed &amp; developed by{" "}
               <span className="font-semibold tracking-wide text-warm-white">
-                Vishnu
+                Vishnu, Pratham &amp; Vaibhav
               </span>
             </p>
             <span aria-hidden className="hidden h-3.5 w-px bg-white/10 sm:block" />
