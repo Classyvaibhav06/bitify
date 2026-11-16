@@ -22,8 +22,8 @@ export function BrandLogo({ className, withEqualizer = false, withWordmark = fal
       <Image
         src="/assets/brand/bitify-logo.png"
         alt="Bitify Music"
-        width={598}
-        height={739}
+        width={648}
+        height={648}
         priority={priority}
         className="h-full w-auto select-none"
       />
