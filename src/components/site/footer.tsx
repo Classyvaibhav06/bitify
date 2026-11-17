@@ -4,6 +4,7 @@ import { Github, Youtube } from "lucide-react";
 import { BrandLogo } from "./brand-logo";
 import { Equalizer } from "./equalizer";
 import { LegalDialogs } from "./legal-dialogs";
+import { VisitorCounter } from "./visitor-counter";
 import { Reveal } from "./reveal";
 import { NAV_LINKS } from "@/lib/site-config";
 
@@ -136,6 +137,7 @@ export function Footer() {
           <p className="text-xs text-white/30">
             © {year} Bitify Music. All rights reserved.
           </p>
+          <VisitorCounter />
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/25">
             Your music. Every screen.
           </p>

@@ -163,6 +163,14 @@ export const SCREENSHOTS = {
 } as const;
 
 /**
+ * Live total page-view counter badge (free abacus.jasoncameron.dev hit API).
+ * Incremented client-side once per page load; hidden silently if unreachable.
+ * Note: counts views, not unique visitors — it has no identity tracking.
+ */
+export const VISITOR_COUNTER_URL =
+  "https://abacus.jasoncameron.dev/hit/bitify-website/total-views";
+
+/**
  * Real TV cutouts — cropped straight from the product photography with
  * transparent backgrounds, keeping their own physical bezels so they are
  * presented directly (no synthetic frames on top). `width`/`height` mirror
