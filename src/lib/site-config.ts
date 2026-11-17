@@ -49,9 +49,9 @@ export const DOWNLOADS: DownloadConfig[] = [
     id: "desktop",
     platform: "Desktop / PC",
     requirements: "Windows 10 or later · 64-bit",
-    version: "v1.6",
+    version: "v1.7.6",
     downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v1.6/Bitify-1.6-windows-x64-setup.exe",
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v1.7.6/Bitify-1.7.6-windows-x64-setup.exe",
     installSteps: [
       "Download the Bitify Music setup for Windows.",
       "Run the installer and follow the on-screen steps.",
@@ -62,9 +62,9 @@ export const DOWNLOADS: DownloadConfig[] = [
     id: "mobile",
     platform: "Android",
     requirements: "Android · 64-bit (ARM64) · APK installer",
-    version: "v1.6",
+    version: "v1.8.0",
     downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.6/Bitify-1.6-arm64.apk",
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.8.0/Bitify-1.8.0-arm64.apk",
     installSteps: [
       "Download the Bitify Music APK on your Android phone.",
       "Open the file and tap Allow if Android asks to install from your browser.",
