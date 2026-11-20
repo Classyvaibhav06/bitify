@@ -27,7 +27,7 @@ const PLATFORM_META: Record<
 > = {
   desktop: {
     icon: Monitor,
-    note: "Windows installer · 64-bit",
+    note: "Windows portable · 64-bit",
     tagline: "For Windows",
     title: "Bitify for Desktop",
     text: "A full studio for your library — a persistent player bar, keyboard-first controls, and a Now Playing view built for losing yourself in an album.",

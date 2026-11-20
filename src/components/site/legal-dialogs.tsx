@@ -300,7 +300,7 @@ function SupportContent() {
           <strong className="text-warm-white">
             When do the download links go live?
           </strong>{" "}
-          Official installers are published on the Downloads section of
+          Official desktop and Android builds are published on the Downloads section of
           this page at release — the buttons there will switch from
           &quot;coming soon&quot; to real links.
         </p>

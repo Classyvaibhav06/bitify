@@ -24,7 +24,7 @@
  * promo-*.webp               Official promotional artwork (provided brand assets)
  *
  * ─── DOWNLOAD LINKS ───────────────────────────────────────────────────────
- * Desktop (Windows x64 setup) and Android (arm64 APK) installers are live
+ * Desktop (Windows x64 portable zip) and Android (arm64 APK) builds are live
  * on GitHub Releases. Set `downloadUrl` for TV once it ships — the UI
  * automatically switches from the "coming soon" state to a real download
  * button. Version strings and OS compatibility live here too.
@@ -48,14 +48,14 @@ export const DOWNLOADS: DownloadConfig[] = [
   {
     id: "desktop",
     platform: "Desktop / PC",
-    requirements: "Windows 10 or later · 64-bit",
-    version: "v1.7.6",
+    requirements: "Windows 10 or later · 64-bit · portable (no install)",
+    version: "v2.0.1",
     downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v1.7.6/Bitify-1.7.6-windows-x64-setup.exe",
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.1/Bitify-2.0.1-windows-x64-portable.zip",
     installSteps: [
-      "Download the Bitify Music setup for Windows.",
-      "Run the installer and follow the on-screen steps.",
-      "Open Bitify Music and start listening.",
+      "Download the Bitify Music portable zip for Windows.",
+      "Extract the zip and open Bitify — no installation needed.",
+      "Start listening from anywhere, including a USB drive.",
     ],
   },
   {
@@ -122,7 +122,7 @@ export const FAQ_ITEMS = [
   {
     question: "How do I install the desktop version?",
     answer:
-      "Once the installer is downloaded, run it and follow the on-screen steps. When installation finishes, open Bitify Music on your computer and press play — your library is ready.",
+      "Extract the downloaded portable zip and open Bitify Music — no installation needed. Press play and your library is ready.",
   },
   {
     question: "Does Bitify Music support TV devices?",

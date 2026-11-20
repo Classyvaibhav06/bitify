@@ -9,7 +9,7 @@ import { DeviceShotImage } from "./devices/device-shot";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { MOBILE_SCREENS, TV_SHOTS, DOWNLOADS } from "@/lib/site-config";
 
-/** the hero's "Download for PC" CTA links the real Windows setup as soon as
+/** the hero's "Download for PC" CTA links the real Windows build as soon as
  *  it is published in site-config, and falls back to the downloads section */
 const DESKTOP_DOWNLOAD =
   DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? "#downloads";
