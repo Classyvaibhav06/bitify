@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, MonitorSmartphone } from "lucide-react";
+import { Smartphone, MonitorSmartphone } from "lucide-react";
 import { Equalizer } from "./equalizer";
 import { LaptopPhoto } from "./devices/laptop-photo";
 import { DeviceShotImage } from "./devices/device-shot";
@@ -13,6 +13,9 @@ import { MOBILE_SCREENS, TV_SHOTS, DOWNLOADS } from "@/lib/site-config";
  *  it is published in site-config, and falls back to the downloads section */
 const DESKTOP_DOWNLOAD =
   DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? "#downloads";
+/** the hero's primary CTA downloads the Android APK from the real release URL */
+const MOBILE_DOWNLOAD =
+  DOWNLOADS.find((d) => d.id === "mobile")?.downloadUrl ?? "#downloads";
 
 /**
  * Hero — a cinematic product shoot in CSS.
@@ -105,11 +108,11 @@ export function Hero() {
           style={{ "--d": "0.44s" } as CSSProperties}
         >
           <a
-            href="#experience"
+            href={MOBILE_DOWNLOAD}
             className="group inline-flex items-center gap-2.5 rounded-full bg-crimson px-7 py-3.5 text-sm font-semibold tracking-wide text-white shadow-[0_12px_40px_-8px_rgba(240,50,60,0.6)] transition-all duration-300 hover:scale-[1.02] hover:bg-crimson-bright hover:shadow-[0_16px_52px_-8px_rgba(240,50,60,0.75)]"
           >
-            Explore Bitify
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+            <Smartphone className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" aria-hidden />
+            Download for Android
           </a>
           <a
             href={DESKTOP_DOWNLOAD}
