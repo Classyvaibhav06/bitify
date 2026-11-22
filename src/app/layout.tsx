@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/toaster";
+import { SITE_URL } from "@/lib/site-config";
+import { StructuredData } from "@/components/site/structured-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,33 +24,39 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-const siteUrl = "https://bitify.music";
+const siteUrl = SITE_URL;
 const siteDescription =
-  "One seamless music experience across your desktop, mobile, and TV. Bitify Music — your music, every screen.";
+  "Bitify Music is a cross-platform music player for Windows, Android and TV — one library with synced lyrics, playlists, listening stats and full-screen playback across every screen. Download the portable app or APK.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Bitify Music — Your Music. Every Screen.",
-    template: "%s · Bitify Music",
+    default: "Bitify Music — Music Player for Desktop, Android & TV",
+    template: "%s | Bitify Music",
   },
   description: siteDescription,
   applicationName: "Bitify Music",
   keywords: [
     "Bitify Music",
-    "music app",
-    "desktop music player",
-    "mobile music app",
+    "cross-platform music player",
+    "music app for desktop and mobile",
+    "Windows portable music player",
+    "Android music APK",
     "TV music app",
-    "multi-platform music",
+    "music player for Windows and Android",
+    "synced lyrics music app",
+    "listening stats music app",
+    "music library across devices",
   ],
   authors: [{ name: "Bitify Music" }],
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.png" }],
   },
   openGraph: {
-    title: "Bitify Music — Your Music. Every Screen.",
+    title: "Bitify Music — Cross-Platform Music Player for Desktop, Android & TV",
     description: siteDescription,
     url: siteUrl,
     siteName: "Bitify Music",
@@ -85,6 +93,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
+        <StructuredData />
         {children}
         <Analytics />
         <Toaster />

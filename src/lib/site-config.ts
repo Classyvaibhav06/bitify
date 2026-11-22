@@ -112,7 +112,7 @@ export const FAQ_ITEMS = [
   {
     question: "Which platforms support Bitify Music?",
     answer:
-      "Bitify Music is available as a desktop / PC application, a mobile application, and a TV application. All three versions are already developed and presented on this page as one ecosystem.",
+      "Bitify Music runs on Windows (a portable x64 app that needs no installation), Android via an ARM64 APK, and as a dedicated TV app for the living room. One library and the same listening experience across desktop, mobile and TV.",
   },
   {
     question: "How can I download Bitify Music?",
@@ -161,6 +161,13 @@ export const SCREENSHOTS = {
     logo: "/assets/brand/bitify-logo.png",
   },
 } as const;
+
+/**
+ * Canonical origin for metadata, canonical tag, sitemap and schema.
+ * Change this one value when a custom domain goes live (also update
+ * robots.txt and the Google Search Console property).
+ */
+export const SITE_URL = "https://bitifyy.vercel.app";
 
 /**
  * Live total page-view counter badge (free abacus.jasoncameron.dev hit API).
