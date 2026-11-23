@@ -1,15 +1,19 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/site-config";
+import { PLATFORM_PAGES, SITE_URL } from "@/lib/site-config";
 
-// Single-page site: one canonical URL. Using the route handler keeps the
-// sitemap's origin in sync with SITE_URL (change that one file for a new domain).
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: SITE_URL,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
+  const now = new Date();
+  const pages: MetadataRoute.Sitemap = [
+    { url: SITE_URL, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    { url: `${SITE_URL}/downloads`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/features`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    ...PLATFORM_PAGES.map((p) => ({
+      url: `${SITE_URL}/${p.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: p.downloadUrl ? 0.8 : 0.5,
+    })),
   ];
+  return pages;
 }

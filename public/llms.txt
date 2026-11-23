@@ -14,12 +14,20 @@ full-screen album artwork.
 - Linux download: Linux x86_64 tar.gz archive (v2.0.3)
 - Android download: ARM64 APK (v1.8.0)
 - TV app: presented on the site; download link coming soon
-- Canonical page: https://bitifyy.vercel.app/
-- Sitemap: https://bitifyy.vercel.app/sitemap.xml
-- Structured data: WebSite, Organization, SoftwareApplication and FAQPage JSON-LD on the homepage
+- Structured data: WebSite, Organization, SoftwareApplication and FAQPage JSON-LD
 
-## Product pages
+## Pages
+- Home: https://bitifyy.vercel.app/
+- All downloads: https://bitifyy.vercel.app/downloads
+- Features: https://bitifyy.vercel.app/features
+- FAQ: https://bitifyy.vercel.app/faq
+- Windows: https://bitifyy.vercel.app/windows
+- macOS: https://bitifyy.vercel.app/mac
+- Linux: https://bitifyy.vercel.app/linux
+- Android: https://bitifyy.vercel.app/android
+- TV: https://bitifyy.vercel.app/tv
+- Sitemap: https://bitifyy.vercel.app/sitemap.xml
+
+## Homepage sections
 - Experience: https://bitifyy.vercel.app/#experience
-- Features: https://bitifyy.vercel.app/#features
-- Downloads: https://bitifyy.vercel.app/#downloads
-- FAQ: https://bitifyy.vercel.app/#faq
+- Downloads on the homepage: https://bitifyy.vercel.app/#downloads

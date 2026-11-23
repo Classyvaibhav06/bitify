@@ -112,12 +112,241 @@ export const DOWNLOADS: DownloadConfig[] = [
   },
 ];
 
+/**
+ * Dedicated, indexable landing pages for each platform. Content is derived
+ * from the product facts already published on the homepage — no invented
+ * specs, pricing or availability.
+ */
+export interface PlatformPageData {
+  slug: string;
+  id: PlatformId;
+  eyebrow: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  highlights: { title: string; text: string }[];
+  steps: string[];
+  faqs: { question: string; answer: string }[];
+  downloadUrl: string | null;
+  version: string;
+  requirements: string;
+}
+
+export const PLATFORM_PAGES: PlatformPageData[] = [
+  {
+    slug: "windows",
+    id: "desktop",
+    eyebrow: "For Windows",
+    title: "Bitify Music for Windows — Portable Music Player",
+    description:
+      "Download Bitify Music for Windows: a portable x64 player with synced lyrics, playlists, listening stats and a full-screen Now Playing view. No installation needed.",
+    h1: "Bitify Music for Windows",
+    intro:
+      "A full listening studio for your Windows desktop. Extract the portable app and get a persistent player bar, keyboard-first controls and a Now Playing view built for losing yourself in an album.",
+    highlights: [
+      {
+        title: "Portable by design",
+        text: "It's a zip, not an installer. Extract it to any folder — or a USB drive — and run Bitify without changing your system.",
+      },
+      {
+        title: "Every part of your library",
+        text: "Liked Music, playlists, listening stats and streaks, search, synced lyrics and full-screen artwork all live in one place.",
+      },
+      {
+        title: "One experience, every screen",
+        text: "The same Bitify experience you know from Android and TV, tuned for the bigger desktop display.",
+      },
+    ],
+    steps: DOWNLOADS.find((d) => d.id === "desktop")?.installSteps ?? [],
+    faqs: [
+      {
+        question: "Do I need administrator rights?",
+        answer:
+          "No. The Windows build is portable — extract the zip and run the executable. There is no installer and no system-wide change.",
+      },
+      {
+        question: "Can I run Bitify Music from a USB drive?",
+        answer:
+          "Yes. Because the app is portable, you can keep it on removable storage and take your setup with you.",
+      },
+    ],
+    downloadUrl: DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? null,
+    version: DOWNLOADS.find((d) => d.id === "desktop")?.version ?? "",
+    requirements: DOWNLOADS.find((d) => d.id === "desktop")?.requirements ?? "",
+  },
+  {
+    slug: "mac",
+    id: "macos",
+    eyebrow: "For macOS",
+    title: "Bitify Music for Mac — Apple Silicon Music Player",
+    description:
+      "Download Bitify Music for macOS on Apple Silicon: a DMG installer with synced lyrics, playlists, listening stats and a full-screen player. Version 2.0.3.",
+    h1: "Bitify Music for Mac",
+    intro:
+      "Your library on Apple Silicon. The macOS build brings the same lyrics, playlists, listening stats and full-screen artwork to your Mac in a familiar DMG installer.",
+    highlights: [
+      {
+        title: "Built for Apple Silicon",
+        text: "This build targets macOS on ARM64 (Apple Silicon) hardware and ships as a standard DMG.",
+      },
+      {
+        title: "Familiar macOS setup",
+        text: "Open the DMG, drag Bitify Music to Applications, and launch it like any other Mac app.",
+      },
+      {
+        title: "The same library, everywhere",
+        text: "Continue with the playlists, Liked Music and listening stats you use on Windows, Android and TV.",
+      },
+    ],
+    steps: DOWNLOADS.find((d) => d.id === "macos")?.installSteps ?? [],
+    faqs: [
+      {
+        question: "Does this build work on Intel Macs?",
+        answer:
+          "This release is built for Apple Silicon (ARM64) Macs. An Intel build is not published yet.",
+      },
+      {
+        question: "How do I install the DMG?",
+        answer:
+          "Download the DMG, open it, drag Bitify Music into your Applications folder, then launch it from Applications. macOS may ask you to confirm on first open.",
+      },
+    ],
+    downloadUrl: DOWNLOADS.find((d) => d.id === "macos")?.downloadUrl ?? null,
+    version: DOWNLOADS.find((d) => d.id === "macos")?.version ?? "",
+    requirements: DOWNLOADS.find((d) => d.id === "macos")?.requirements ?? "",
+  },
+  {
+    slug: "linux",
+    id: "linux",
+    eyebrow: "For Linux",
+    title: "Bitify Music for Linux — x86_64 Music Player",
+    description:
+      "Download Bitify Music for Linux x86_64: a standalone tar.gz with synced lyrics, playlists, listening stats and a full-screen player. Version 2.0.3.",
+    h1: "Bitify Music for Linux",
+    intro:
+      "A standalone player for Linux desktops. Download the x86_64 tarball, extract it and run Bitify — no package manager, no install step, no root access required.",
+    highlights: [
+      {
+        title: "Standalone tarball",
+        text: "The Linux build is distributed as a tar.gz archive. Unpack it and run the executable from a folder you control.",
+      },
+      {
+        title: "No system changes",
+        text: "Because it runs from the extracted folder, Bitify doesn't need to be installed system-wide.",
+      },
+      {
+        title: "All the listening tools",
+        text: "Search, Liked Music, playlists, listening stats, synced lyrics and full-screen artwork are all included.",
+      },
+    ],
+    steps: DOWNLOADS.find((d) => d.id === "linux")?.installSteps ?? [],
+    faqs: [
+      {
+        question: "Which Linux systems are supported?",
+        answer:
+          "This build targets Linux on x86_64 processors and runs from an extracted tarball. Check the download requirements before grabbing it.",
+      },
+      {
+        question: "Do I need root access?",
+        answer:
+          "No. Extract the archive into your own folder and run the Bitify Music executable from there.",
+      },
+    ],
+    downloadUrl: DOWNLOADS.find((d) => d.id === "linux")?.downloadUrl ?? null,
+    version: DOWNLOADS.find((d) => d.id === "linux")?.version ?? "",
+    requirements: DOWNLOADS.find((d) => d.id === "linux")?.requirements ?? "",
+  },
+  {
+    slug: "android",
+    id: "mobile",
+    eyebrow: "For Android",
+    title: "Bitify Music for Android — ARM64 Music App (APK)",
+    description:
+      "Download the Bitify Music Android APK: quick picks, synced lyrics, one-handed playback and full-screen artwork. ARM64 build, version 1.8.0.",
+    h1: "Bitify Music for Android",
+    intro:
+      "Your music in your pocket. Quick picks, synced lyrics and a one-handed player that goes wherever you do — with the same library you know from desktop and TV.",
+    highlights: [
+      {
+        title: "Made for one hand",
+        text: "Search, likes and playback controls stay within thumb reach, with full-screen album artwork when you want it.",
+      },
+      {
+        title: "Lyrics that keep up",
+        text: "Synced lyrics and a Now Playing view turn a phone into a proper listening device.",
+      },
+      {
+        title: "Direct APK download",
+        text: "The ARM64 APK is available straight from the release — no app store account required.",
+      },
+    ],
+    steps: DOWNLOADS.find((d) => d.id === "mobile")?.installSteps ?? [],
+    faqs: [
+      {
+        question: "Is Bitify Music on Google Play?",
+        answer:
+          "The Android build is currently distributed as an APK from the Downloads section of this site. A Play Store listing has not been published yet.",
+      },
+      {
+        question: "Which Android devices does it support?",
+        answer:
+          "This APK is built for 64-bit ARM (ARM64) Android devices.",
+      },
+    ],
+    downloadUrl: DOWNLOADS.find((d) => d.id === "mobile")?.downloadUrl ?? null,
+    version: DOWNLOADS.find((d) => d.id === "mobile")?.version ?? "",
+    requirements: DOWNLOADS.find((d) => d.id === "mobile")?.requirements ?? "",
+  },
+  {
+    slug: "tv",
+    id: "tv",
+    eyebrow: "For TV",
+    title: "Bitify Music for TV — The Living Room Experience",
+    description:
+      "Bitify Music on television: big artwork, synced lyrics and a queue for the whole room, with navigation made for a remote. TV download link coming soon.",
+    h1: "Bitify Music for TV",
+    intro:
+      "Bring music into the room. The TV experience is built around large artwork, a queue everyone can see, and controls made for a remote instead of a mouse.",
+    highlights: [
+      {
+        title: "Made for the big screen",
+        text: "Full-screen artwork and lyrics that read from across the room.",
+      },
+      {
+        title: "A queue for everyone",
+        text: "See what's playing and what's next without reaching for a phone.",
+      },
+      {
+        title: "One ecosystem",
+        text: "The same Bitify listening experience you use on desktop, Mac, Linux and Android.",
+      },
+    ],
+    steps: DOWNLOADS.find((d) => d.id === "tv")?.installSteps ?? [],
+    faqs: [
+      {
+        question: "Is the TV app available to download?",
+        answer:
+          "The TV experience is presented on this site. Its download link will be published in the Downloads section as soon as it goes live.",
+      },
+      {
+        question: "What kind of TVs is it for?",
+        answer:
+          "It's designed for smart TVs and Android TV-style interfaces, with navigation built around a remote.",
+      },
+    ],
+    downloadUrl: DOWNLOADS.find((d) => d.id === "tv")?.downloadUrl ?? null,
+    version: DOWNLOADS.find((d) => d.id === "tv")?.version ?? "",
+    requirements: DOWNLOADS.find((d) => d.id === "tv")?.requirements ?? "",
+  },
+];
+
 export const NAV_LINKS = [
   { label: "Experience", href: "#experience" },
   { label: "Desktop", href: "#desktop" },
   { label: "Mobile", href: "#mobile" },
   { label: "TV", href: "#tv" },
-  { label: "Downloads", href: "#downloads" },
+  { label: "Downloads", href: "/downloads" },
 ] as const;
 
 export const DESKTOP_NAV_ITEMS = [

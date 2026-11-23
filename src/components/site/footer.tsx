@@ -132,6 +132,17 @@ export function Footer() {
           </div>
         </Reveal>
 
+        {/* platform links — crawlable internal links from every page */}
+        <nav aria-label="Bitify Music platforms" className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-3 border-t border-white/[0.06] pt-10 text-xs text-muted-warm">
+          <a href="/windows" className="hover:text-warm-white">Windows</a>
+          <a href="/mac" className="hover:text-warm-white">macOS</a>
+          <a href="/linux" className="hover:text-warm-white">Linux</a>
+          <a href="/android" className="hover:text-warm-white">Android</a>
+          <a href="/tv" className="hover:text-warm-white">TV</a>
+          <a href="/features" className="hover:text-warm-white">Features</a>
+          <a href="/faq" className="hover:text-warm-white">FAQ</a>
+        </nav>
+
         {/* legal line */}
         <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
           <p className="text-xs text-white/30">

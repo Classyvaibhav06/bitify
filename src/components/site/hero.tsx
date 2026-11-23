@@ -185,7 +185,7 @@ export function Hero() {
               <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem asChild>
                 <a
-                  href="#downloads"
+                  href="/downloads"
                   className="flex cursor-pointer items-center justify-center rounded-xl px-3 py-2 text-xs font-medium text-muted-warm outline-none transition-colors hover:text-warm-white focus:bg-white/[0.08] data-[highlighted]:bg-white/[0.08]"
                 >
                   See all downloads

@@ -5,6 +5,8 @@ import { DOWNLOADS, FAQ_ITEMS, SITE_URL } from "@/lib/site-config";
  * Uses only facts already published on the page — no invented claims.
  * Emitted server-side so crawlers see it in the raw HTML.
  */
+import { JsonLd } from "./json-ld";
+
 export function StructuredData() {
   const software = DOWNLOADS.filter((d) => d.downloadUrl).map((d) => ({
     "@type": "SoftwareApplication",
@@ -50,8 +52,5 @@ export function StructuredData() {
     ],
   };
 
-  // escape "<" so a string can never terminate the script element
-  const json = JSON.stringify(schema).replace(/</g, "\\u003c");
-
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />;
+  return <JsonLd schema={schema} />;
 }
