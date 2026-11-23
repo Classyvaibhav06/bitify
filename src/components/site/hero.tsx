@@ -2,17 +2,36 @@
 
 import { useRef, type CSSProperties } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { Smartphone, MonitorSmartphone } from "lucide-react";
+import { Apple, ChevronDown, Monitor, Smartphone, MonitorSmartphone, Terminal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Equalizer } from "./equalizer";
 import { LaptopPhoto } from "./devices/laptop-photo";
 import { DeviceShotImage } from "./devices/device-shot";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { MOBILE_SCREENS, TV_SHOTS, DOWNLOADS } from "@/lib/site-config";
 
-/** the hero's "Download for PC" CTA links the real Windows build as soon as
- *  it is published in site-config, and falls back to the downloads section */
-const DESKTOP_DOWNLOAD =
-  DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? "#downloads";
+/** the hero's "Download for PC" CTA opens a chooser for the three desktop builds */
+const DESKTOP_PLATFORMS = (["desktop", "macos", "linux"] as const)
+  .map((id) => DOWNLOADS.find((d) => d.id === id))
+  .filter((d): d is (typeof DOWNLOADS)[number] => Boolean(d?.downloadUrl));
+
+const DESKTOP_ICONS: Record<string, typeof Monitor> = {
+  desktop: Monitor,
+  macos: Apple,
+  linux: Terminal,
+};
+const DESKTOP_LABELS: Record<string, string> = {
+  desktop: "Windows",
+  macos: "macOS",
+  linux: "Linux",
+};
 /** the hero's primary CTA downloads the Android APK from the real release URL */
 const MOBILE_DOWNLOAD =
   DOWNLOADS.find((d) => d.id === "mobile")?.downloadUrl ?? "#downloads";
@@ -114,13 +133,66 @@ export function Hero() {
             <Smartphone className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" aria-hidden />
             Download for Android
           </a>
-          <a
-            href={DESKTOP_DOWNLOAD}
-            className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold tracking-wide text-warm-white transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07]"
-          >
-            <MonitorSmartphone className="h-4 w-4 text-muted-warm transition-colors group-hover:text-warm-white" aria-hidden />
-            Download for PC
-          </a>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="group inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold tracking-wide text-warm-white transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crimson"
+              >
+                <MonitorSmartphone
+                  className="h-4 w-4 text-muted-warm transition-colors group-hover:text-warm-white"
+                  aria-hidden
+                />
+                Download for PC
+                <ChevronDown className="h-3.5 w-3.5 text-muted-warm transition-transform duration-300 group-data-[state=open]:rotate-180" aria-hidden />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="center"
+              sideOffset={10}
+              className="w-[272px] rounded-2xl border border-white/10 bg-[#101013]/95 p-2 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.9)] backdrop-blur-md"
+            >
+              <DropdownMenuLabel className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                Choose your desktop
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              {DESKTOP_PLATFORMS.map((dl) => {
+                const Icon = DESKTOP_ICONS[dl.id] ?? Monitor;
+                return (
+                  <DropdownMenuItem key={dl.id} asChild>
+                    <a
+                      href={dl.downloadUrl ?? "#downloads"}
+                      rel="noopener noreferrer"
+                      aria-label={`Download Bitify Music for ${DESKTOP_LABELS[dl.id] ?? dl.platform}, ${dl.version}`}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 outline-none transition-colors focus:bg-white/[0.08] data-[highlighted]:bg-white/[0.08]"
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
+                        <Icon className="h-4 w-4 text-crimson-bright" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-warm-white">
+                          {DESKTOP_LABELS[dl.id] ?? dl.platform}
+                        </span>
+                        <span className="block truncate text-[11px] text-muted-warm">
+                          {dl.requirements}
+                        </span>
+                      </span>
+                      <span className="font-mono text-[10px] text-white/40">{dl.version}</span>
+                    </a>
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem asChild>
+                <a
+                  href="#downloads"
+                  className="flex cursor-pointer items-center justify-center rounded-xl px-3 py-2 text-xs font-medium text-muted-warm outline-none transition-colors hover:text-warm-white focus:bg-white/[0.08] data-[highlighted]:bg-white/[0.08]"
+                >
+                  See all downloads
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* ---- device stage — the laptop leads from the right, the TV
