@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowDownToLine, Clock, Monitor, Smartphone, Tv } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Apple, ArrowDownToLine, Clock, Monitor, Smartphone, Terminal, Tv } from "lucide-react";
 import { Reveal } from "./reveal";
 import { PhoneMockup } from "./devices/phone-mockup";
 import { DeviceShotImage } from "./devices/device-shot";
@@ -31,6 +32,20 @@ const PLATFORM_META: Record<
     tagline: "For Windows",
     title: "Bitify for Desktop",
     text: "A full studio for your library — a persistent player bar, keyboard-first controls, and a Now Playing view built for losing yourself in an album.",
+  },
+  macos: {
+    icon: Apple,
+    note: "macOS · Apple Silicon (ARM64) · DMG",
+    tagline: "For macOS",
+    title: "Bitify for Mac",
+    text: "Your library on Apple Silicon — the same synced lyrics, playlists and full-screen player, in a native macOS installer.",
+  },
+  linux: {
+    icon: Terminal,
+    note: "Linux x86_64 · tar.gz archive",
+    tagline: "For Linux",
+    title: "Bitify for Linux",
+    text: "A standalone tarball for x86_64 Linux desktops — extract it and run Bitify with no package manager or install step.",
   },
   mobile: {
     icon: Smartphone,
@@ -91,6 +106,45 @@ function PlatformVisual({ id }: { id: PlatformId }) {
       </div>
     );
   }
+  if (id === "macos" || id === "linux") {
+    const Icon = id === "macos" ? Apple : Terminal;
+    const label = id === "macos" ? "macOS" : "Linux";
+    const version = DOWNLOADS.find((d) => d.id === id)?.version ?? "Latest";
+    return (
+      <div className="relative mx-auto flex min-h-[320px] w-full max-w-[520px] items-center justify-center sm:min-h-[380px]">
+        <div
+          aria-hidden
+          className="absolute inset-x-[12%] top-1/2 -z-10 h-[70%] -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.14),transparent_70%)] blur-2xl"
+        />
+        <div className="relative w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.015] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
+          <div className="flex items-start justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+              Bitify Music
+            </span>
+            <span className="rounded-full bg-crimson/15 px-2.5 py-1 font-mono text-[10px] text-crimson-bright">
+              {version}
+            </span>
+          </div>
+          <div className="mt-12 flex items-center gap-5">
+            <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
+              <Icon className="h-10 w-10 text-warm-white" aria-hidden />
+            </span>
+            <div>
+              <p className="font-display text-4xl font-semibold text-warm-white">{label}</p>
+              <p className="mt-1 text-sm text-muted-warm">
+                {id === "macos" ? "Apple Silicon · DMG" : "x86_64 · tar.gz"}
+              </p>
+            </div>
+          </div>
+          <div className="mt-12 flex items-end gap-1.5" aria-hidden>
+            {[28, 44, 64, 44, 28].map((h, i) => (
+              <span key={i} className="w-1.5 rounded-full bg-crimson/60" style={{ height: h }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="relative mx-auto w-full max-w-[620px]">
       {/* ambilight — rear light strip behind the television */}
@@ -106,6 +160,16 @@ function PlatformVisual({ id }: { id: PlatformId }) {
 
 export function Downloads() {
   const { toast } = useToast();
+  const [userOS, setUserOS] = useState<PlatformId | null>(null);
+
+  // highlight the visitor's own platform — makes the right download obvious
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    if (/Android/i.test(ua)) setUserOS("mobile");
+    else if (/Windows/i.test(ua)) setUserOS("desktop");
+    else if (/Macintosh|Mac OS X/i.test(ua)) setUserOS("macos");
+    else if (/Linux/i.test(ua)) setUserOS("linux");
+  }, []);
 
   const notifyPending = (platform: string) => {
     toast({
@@ -145,6 +209,37 @@ export function Downloads() {
           </p>
         </Reveal>
 
+        {/* ---- quick jump: keyboard/screen-reader friendly platform nav ---- */}
+        <Reveal className="mt-12">
+          <nav aria-label="Jump to a platform download" className="flex flex-wrap justify-center gap-2">
+            {DOWNLOADS.map((dl) => {
+              const Icon = PLATFORM_META[dl.id].icon;
+              const recommended = dl.id === userOS;
+              return (
+                <a
+                  key={dl.id}
+                  href={`#download-${dl.id}`}
+                  aria-label={`Jump to the ${dl.platform} download${recommended ? " (recommended for your device)" : ""}`}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson",
+                    recommended
+                      ? "border-crimson/50 bg-crimson/10 text-warm-white"
+                      : "border-white/10 bg-white/[0.03] text-muted-warm hover:border-white/25 hover:text-warm-white"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
+                  {dl.platform}
+                  {recommended && (
+                    <span className="rounded-full bg-crimson/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-crimson-bright">
+                      Yours
+                    </span>
+                  )}
+                </a>
+              );
+            })}
+          </nav>
+        </Reveal>
+
         {/* ---- one platform per row: visual on one side, download on the other ---- */}
         {DOWNLOADS.map((dl, i) => {
           const meta = PLATFORM_META[dl.id];
@@ -152,9 +247,10 @@ export function Downloads() {
           return (
             <div
               key={dl.id}
+              id={`download-${dl.id}`}
               aria-label={`Download Bitify Music for ${dl.platform}`}
               className={cn(
-                "grid items-center gap-12 border-t border-white/[0.05] py-16 sm:py-20 lg:gap-16 lg:py-24",
+                "scroll-mt-28 grid items-center gap-12 border-t border-white/[0.05] py-16 sm:py-20 lg:gap-16 lg:py-24",
                 // desktop row: extra-wide visual column so the laptop
                 // render reads large; other rows stay 50/50
                 i === 0
@@ -187,6 +283,13 @@ export function Downloads() {
                     {meta.title}
                   </h3>
 
+                  {dl.id === userOS && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-crimson/40 bg-crimson/10 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-crimson-bright">
+                      <span className="h-1.5 w-1.5 rounded-full bg-crimson" aria-hidden />
+                      Recommended for your device
+                    </p>
+                  )}
+
                   <p className="mt-4 text-pretty text-base leading-relaxed text-muted-warm">
                     {meta.text}
                   </p>
@@ -214,7 +317,9 @@ export function Downloads() {
                     {dl.downloadUrl ? (
                       <a
                         href={dl.downloadUrl}
-                        className="group inline-flex items-center gap-2.5 rounded-full bg-crimson px-7 py-3.5 text-sm font-semibold tracking-wide text-white shadow-[0_12px_40px_-8px_rgba(224,57,62,0.6)] transition-all duration-300 hover:scale-[1.02] hover:bg-crimson-bright hover:shadow-[0_16px_52px_-8px_rgba(224,57,62,0.75)]"
+                        aria-label={`Download Bitify Music for ${dl.platform}, ${dl.version || "latest"}`}
+                        rel="noopener noreferrer"
+                        className="group inline-flex items-center gap-2.5 rounded-full bg-crimson px-7 py-3.5 text-sm font-semibold tracking-wide text-white shadow-[0_12px_40px_-8px_rgba(224,57,62,0.6)] transition-all duration-300 hover:scale-[1.02] hover:bg-crimson-bright hover:shadow-[0_16px_52px_-8px_rgba(224,57,62,0.75)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crimson"
                       >
                         <ArrowDownToLine
                           className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5"

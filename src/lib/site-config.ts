@@ -24,13 +24,14 @@
  * promo-*.webp               Official promotional artwork (provided brand assets)
  *
  * ─── DOWNLOAD LINKS ───────────────────────────────────────────────────────
- * Desktop (Windows x64 portable zip) and Android (arm64 APK) builds are live
+ * Desktop builds (Windows portable, macOS DMG, Linux tarball) and the Android
+ * APK are live on GitHub Releases.
  * on GitHub Releases. Set `downloadUrl` for TV once it ships — the UI
  * automatically switches from the "coming soon" state to a real download
  * button. Version strings and OS compatibility live here too.
  */
 
-export type PlatformId = "desktop" | "mobile" | "tv";
+export type PlatformId = "desktop" | "macos" | "linux" | "mobile" | "tv";
 
 export interface DownloadConfig {
   id: PlatformId;
@@ -56,6 +57,32 @@ export const DOWNLOADS: DownloadConfig[] = [
       "Download the Bitify Music portable zip for Windows.",
       "Extract the zip and open Bitify — no installation needed.",
       "Start listening from anywhere, including a USB drive.",
+    ],
+  },
+  {
+    id: "macos",
+    platform: "macOS",
+    requirements: "macOS · Apple Silicon (ARM64) · DMG installer",
+    version: "v2.0.3",
+    downloadUrl:
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.3/ytm-rs-setup-2.0.3-macos-arm64.dmg",
+    installSteps: [
+      "Download the Bitify Music DMG for Apple Silicon Macs.",
+      "Open the DMG and drag Bitify Music into your Applications folder.",
+      "Launch it from Applications — macOS may ask to confirm on first open.",
+    ],
+  },
+  {
+    id: "linux",
+    platform: "Linux",
+    requirements: "Linux x86_64 · tar.gz archive",
+    version: "v2.0.3",
+    downloadUrl:
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.3/ytm-rs-2.0.3-linux-x86_64.tar.gz",
+    installSteps: [
+      "Download the Linux x86_64 tarball.",
+      "Extract it with: tar -xzf ytm-rs-2.0.3-linux-x86_64.tar.gz",
+      "Open the extracted folder and run the Bitify Music executable.",
     ],
   },
   {
@@ -112,12 +139,12 @@ export const FAQ_ITEMS = [
   {
     question: "Which platforms support Bitify Music?",
     answer:
-      "Bitify Music runs on Windows (a portable x64 app that needs no installation), Android via an ARM64 APK, and as a dedicated TV app for the living room. One library and the same listening experience across desktop, mobile and TV.",
+      "Bitify Music runs on Windows (a portable x64 app that needs no installation), macOS on Apple Silicon (DMG), Linux x86_64 (tar.gz), Android via an ARM64 APK, and as a dedicated TV app. One library and the same listening experience on every screen.",
   },
   {
     question: "How can I download Bitify Music?",
     answer:
-      "Bitify Music for Windows and the Android app (APK) are available now — grab them from the Downloads section of this page. The TV app's link will be published there as soon as it goes live.",
+      "Windows (portable zip), macOS (Apple Silicon DMG), Linux (x86_64 tarball) and Android (ARM64 APK) builds are available now — grab yours from the Downloads section. The TV app's link will be published there as soon as it goes live.",
   },
   {
     question: "How do I install the desktop version?",
