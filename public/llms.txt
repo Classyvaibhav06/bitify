@@ -12,7 +12,7 @@ full-screen album artwork.
 - Desktop download: Windows x64 portable zip (v2.0.1), no installation needed
 - Mac download: macOS ARM64 DMG installer (v2.0.3)
 - Linux download: Linux x86_64 tar.gz archive (v2.0.3)
-- Android download: ARM64 APK (v1.8.0)
+- Android download: ARM64 APK (v1.8.3)
 - TV app: presented on the site; download link coming soon
 - Structured data: WebSite, Organization, SoftwareApplication and FAQPage JSON-LD
 

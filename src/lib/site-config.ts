@@ -89,9 +89,9 @@ export const DOWNLOADS: DownloadConfig[] = [
     id: "mobile",
     platform: "Android",
     requirements: "Android · 64-bit (ARM64) · APK installer",
-    version: "v1.8.0",
+    version: "v1.8.3",
     downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.8.0/Bitify-1.8.0-arm64.apk",
+      "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.8.3/Bitify-1.8.3-arm64.apk",
     installSteps: [
       "Download the Bitify Music APK on your Android phone.",
       "Open the file and tap Allow if Android asks to install from your browser.",
@@ -263,7 +263,7 @@ export const PLATFORM_PAGES: PlatformPageData[] = [
     eyebrow: "For Android",
     title: "Bitify Music for Android — ARM64 Music App (APK)",
     description:
-      "Download the Bitify Music Android APK: quick picks, synced lyrics, one-handed playback and full-screen artwork. ARM64 build, version 1.8.0.",
+      "Download the Bitify Music Android APK: quick picks, synced lyrics, one-handed playback and full-screen artwork. ARM64 build, version 1.8.3.",
     h1: "Bitify Music for Android",
     intro:
       "Your music in your pocket. Quick picks, synced lyrics and a one-handed player that goes wherever you do — with the same library you know from desktop and TV.",
