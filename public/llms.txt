@@ -8,12 +8,10 @@ full-screen album artwork.
 
 ## Key facts
 - Official site: https://bitifyy.vercel.app
-- Platform: cross-platform — Windows desktop, macOS (Apple Silicon), Linux x86_64, Android (ARM64), TV
-- Desktop download: Windows x64 portable zip (v2.0.1), no installation needed
-- Mac download: macOS ARM64 DMG installer (v2.0.3)
-- Linux download: Linux x86_64 tar.gz archive (v2.0.3)
-- Android download: ARM64 APK (v1.8.4)
-- TV app: presented on the site; download link coming soon
+- Platform: Windows, macOS, Linux, Android and TV
+- Desktop: v2.0.3 installers for Windows (x64 + ARM64), macOS (Apple Silicon + Intel) and Linux (x86_64 tarball)
+- Android: v1.8.4 ARM64 APK
+- TV: experience presented on the site; download link coming soon
 - Structured data: WebSite, Organization, SoftwareApplication and FAQPage JSON-LD
 
 ## Pages

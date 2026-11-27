@@ -1,113 +1,161 @@
-"use client";
-
-import { Reveal } from "./reveal";
+import type { CSSProperties } from "react";
+import { Reveal, StaggerGroup, StaggerItem } from "./reveal";
 
 /**
- * Integrations — the quiet "plays nicely with…" strip.
+ * Integrations — the "plays nicely with…" wall.
  *
- * A single row of the services and surfaces Bitify Music understands out
- * of the box: scrobbling destinations, community presence, the lyric
- * provider behind the word-synced experience, and the cast / car
- * endpoints the mobile app speaks to. Rendered as monochrome brand
- * marks (single-path 24×24 glyphs) so the strip stays calm and lets the
- * section copy carry the message — exactly one accent of colour, no
- * brand palettes fighting the crimson theme.
+ * Eight services Bitify speaks to out of the box, each on its own tile:
+ * a brand glyph in a quiet chip, the name, and one honest line about
+ * what the connection actually does. Every tile carries its brand
+ * colour as a --brand triplet that only ignites on hover — the wall
+ * stays monochrome until you touch it. Below, the open protocols the
+ * integrations ride on, spelled out in mono chips.
  */
 interface Integration {
   label: string;
   /** single-path 24×24 brand glyph (simple-icons geometry) */
   path: string;
+  /** one honest line about what the connection does */
+  note: string;
+  /** space-separated brand rgb triplet — arrives on hover */
+  brand?: string;
 }
 
 const INTEGRATIONS: Integration[] = [
   {
     label: "YouTube Music",
+    note: "The streaming source — your full library, mirrored.",
+    brand: "255 0 51",
     path: "M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.104c-3.924 0-7.104-3.18-7.104-7.104S8.076 4.896 12 4.896s7.104 3.18 7.104 7.104-3.18 7.104-7.104 7.104zm0-13.332c-3.432 0-6.228 2.796-6.228 6.228S8.568 18.228 12 18.228s6.228-2.796 6.228-6.228S15.432 5.772 12 5.772zM9.684 15.54V8.46L15.816 12l-6.132 3.54z",
   },
   {
     label: "Spotify",
+    note: "Playlists and favourites, brought over in one pass.",
+    brand: "29 185 84",
     path: "M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z",
   },
   {
     label: "Discord",
+    note: "Rich presence — your profile shows the track.",
+    brand: "88 101 242",
     path: "M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z",
   },
   {
     label: "Last.fm",
+    note: "Every play scrobbled into your listening history.",
+    brand: "213 16 7",
     path: "M10.584 17.21l-.88-2.392s-1.43 1.594-3.573 1.594c-1.897 0-3.244-1.649-3.244-4.288 0-3.382 1.704-4.591 3.381-4.591 2.42 0 3.189 1.567 3.849 3.574l.88 2.749c.88 2.666 2.529 4.81 7.285 4.81 3.409 0 5.718-1.044 5.718-3.793 0-2.227-1.265-3.381-3.63-3.931l-1.758-.385c-1.21-.275-1.567-.77-1.567-1.595 0-.934.742-1.484 1.952-1.484 1.32 0 2.034.495 2.144 1.677l2.749-.33c-.22-2.474-1.924-3.492-4.729-3.492-2.474 0-4.893.935-4.893 3.932 0 1.87.907 3.051 3.189 3.601l1.87.44c1.402.33 1.869.907 1.869 1.704 0 1.017-.99 1.43-2.86 1.43-2.776 0-3.93-1.457-4.59-3.464l-.907-2.75c-1.155-3.573-2.997-4.893-6.653-4.893C2.144 5.333 0 7.89 0 12.233c0 4.18 2.144 6.434 5.993 6.434 3.106 0 4.591-1.457 4.591-1.457z",
   },
   {
     label: "ListenBrainz",
+    note: "Open listening stats, owned by you.",
+    brand: "53 112 240",
     path: "M11.4 1.35 2.5 6.5v11l8.9 5.15V1.35zm1.2 0v21.3l8.9-5.15v-11L12.6 1.35z",
   },
   {
     label: "Musixmatch",
+    note: "Word-synced lyrics, with translation.",
     path: "M3 5l9 5.3L21 5v14l-9-5.3L3 19zM3 8.4l9 5.3 9-5.3M3 15.6l9-5.3 9 5.3",
   },
   {
     label: "Google Cast",
+    note: "Beam the queue to any speaker or screen.",
+    brand: "66 133 244",
     path: "M0 18.5455v3.2727h3.2727c0-1.811-1.4618-3.2727-3.2727-3.2727zm0-4.3637v2.1818c3.011 0 5.4545 2.4437 5.4545 5.4546h2.1819c0-4.2218-3.4146-7.6364-7.6364-7.6364zm0-4.3636V12c5.4218 0 9.8182 4.3964 9.8182 9.8182H12c0-6.6327-5.3782-12-12-12zm21.8182-7.6364H2.1818C.9818 2.1818 0 3.1636 0 4.3636v3.2728h2.1818V4.3636h19.6364v15.2728h-7.6364v2.1818h7.6364c1.2 0 2.1818-.9818 2.1818-2.1818V4.3636c0-1.2-.9818-2.1818-2.1818-2.1818Z",
   },
   {
     label: "Android Auto",
+    note: "Made for the drive — controls on the dash.",
+    brand: "61 220 132",
     path: "M12 0c-.6 0-1.11.32-1.39.8L.48 18.4a1.6 1.6 0 0 0 1.39 2.4h2l7.7-13.58.43-.77 8.13 14.35h2a1.6 1.6 0 0 0 1.39-2.4L13.39.8A1.6 1.6 0 0 0 12 0zm0 7.47l-9.07 16 .54.53L12 20.8l8.53 3.2.54-.53z",
   },
 ];
+
+/** the open rails everything rides on — spelled out, no logos needed */
+const PROTOCOLS = [
+  "Last.fm API",
+  "Discord RPC",
+  "ListenBrainz",
+  "Chromecast",
+  "Android Auto",
+] as const;
 
 export function Integrations() {
   return (
     <section
       id="integrations"
       aria-label="Integrations"
-      className="relative overflow-hidden border-t border-white/[0.05]"
+      className="relative border-t border-white/[0.05]"
     >
-      {/* faint ambience so the strip doesn't sit flat on pure black —
-          soft radial wash, no blur filter (cheaper on mobile) */}
-      <div
-        aria-hidden
-        className="absolute left-1/2 top-1/2 -z-10 h-[380px] w-[860px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(224,57,62,0.05),transparent_65%)]"
-      />
-
-      {/* ---- centered header ---- */}
-      <div className="mx-auto max-w-[1200px] px-6 pt-20 sm:pt-28">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="eyebrow inline-flex items-center gap-3">
-            <span className="inline-block h-px w-8 bg-crimson/70" aria-hidden />
+      <div aria-hidden className="ambient-top" />
+      <div className="relative mx-auto max-w-[1200px] px-6 py-24 sm:py-32">
+        {/* ---- header ---- */}
+        <Reveal className="max-w-2xl">
+          <p className="eyebrow">
+            <span className="eyebrow-idx">04</span>
             Integrations
-            <span className="inline-block h-px w-8 bg-crimson/70" aria-hidden />
           </p>
-          <h2 className="mt-5 font-display text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-warm-white sm:text-5xl">
-            Plays nicely with everything you already use.
+          <h2 className="mt-5 font-display text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-warm-white sm:text-5xl">
+            Plays nicely with everything you{" "}
+            <span className="text-crimson-bright">already</span> use.
           </h2>
           <p className="mt-6 text-pretty text-base leading-relaxed text-muted-warm sm:text-lg">
             Scrobbling, Discord presence, word-synced lyrics with translation,
             casting and car playback — all built in, no plugins required.
           </p>
         </Reveal>
-      </div>
 
-      {/* ---- brand strip — a slightly wider band than the text column, so
-           all eight marks sit on one calm row on wide screens ---- */}
-      <div className="mx-auto max-w-[1280px] px-6 pb-20 sm:pb-28">
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-5 sm:mt-16">
-          {INTEGRATIONS.map((it, i) => (
-            <Reveal key={it.label} delay={0.05 + i * 0.045} y={14}>
-              <div className="group flex cursor-default items-center gap-2.5 text-white/70 transition-colors duration-300 hover:text-warm-white">
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  focusable="false"
-                  className="h-5 w-5 shrink-0 fill-current transition-transform duration-300 group-hover:scale-110"
-                >
-                  <path d={it.path} />
-                </svg>
-                <span className="text-[15px] font-semibold tracking-[-0.01em]">
-                  {it.label}
+        {/* ---- the wall: eight proper tiles ---- */}
+        <StaggerGroup className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {INTEGRATIONS.map((it) => (
+            <StaggerItem key={it.label} className="h-full">
+              <article
+                className="int-tile h-full"
+                style={(it.brand ? { "--brand": it.brand } : {}) as CSSProperties}
+              >
+                <span className="int-glyph" aria-hidden>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                    className="h-6 w-6 fill-current"
+                  >
+                    <path d={it.path} />
+                  </svg>
                 </span>
-              </div>
-            </Reveal>
+                <div>
+                  <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-warm-white">
+                    {it.label}
+                  </h3>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted-warm">
+                    {it.note}
+                  </p>
+                </div>
+              </article>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
+
+        {/* ---- the open rails — mono protocol chips ---- */}
+        <Reveal delay={0.14} className="mt-8">
+          <div className="flex flex-col items-start gap-5 border-t border-white/[0.06] pt-7 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[13px] text-white/40">
+              All of it rides on open rails — no plugins, no extensions,
+              nothing to configure.
+            </p>
+            <ul className="flex flex-wrap items-center gap-2">
+              {PROTOCOLS.map((p) => (
+                <li key={p} className="proto-chip">
+                  <span
+                    aria-hidden
+                    className="inline-block h-1 w-1 rounded-full bg-crimson-bright/70"
+                  />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

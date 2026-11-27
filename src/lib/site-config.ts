@@ -19,70 +19,126 @@
  *                            matching the product-photography cutouts.
  * tv-lyrics-spotlight.webp    Clean bezel-free Lyrics capture for the
  *                            Features “centrepiece” spotlight.
- * desktop-*.webp             Desktop app window screenshots (shown inside the
- *                            monitor mockup / window frame).
- * promo-*.webp               Official promotional artwork (provided brand assets)
+ * desktop-home/lyrics/        Latest desktop app captures (v2.0.3 UI) — Home,
+ * explore.webp                Now Playing with word-synced lyrics, and the
+ *                            Explore view. Shown in the hero switcher, the
+ *                            sticky Showcase stack and the window frames.
  *
  * ─── DOWNLOAD LINKS ───────────────────────────────────────────────────────
- * Desktop builds (Windows portable, macOS DMG, Linux tarball) and the Android
- * APK are live on GitHub Releases.
- * on GitHub Releases. Set `downloadUrl` for TV once it ships — the UI
- * automatically switches from the "coming soon" state to a real download
- * button. Version strings and OS compatibility live here too.
+ * All installers are live on GitHub Releases (repo: bitify-updates):
+ *   • Desktop v2.0.3 — Windows (x64 + ARM64), macOS (Apple Silicon +
+ *     Intel) and Linux (x86_64) builds.
+ *   • Mobile v1.8.4 — Android APK (arm64).
+ * Set `downloadUrl` for TV once it ships — the UI automatically switches
+ * from the "coming soon" state to a real download button. Version strings,
+ * OS compatibility and per-build file sizes live here too.
  */
 
-export type PlatformId = "desktop" | "macos" | "linux" | "mobile" | "tv";
+export type PlatformId = "desktop" | "mobile" | "tv";
+export type DesktopOs = "windows" | "macos" | "linux";
+
+/** Metadata for the three desktop operating systems */
+export const OS_META: Record<
+  DesktopOs,
+  { label: string; short: string; format: string; note: string }
+> = {
+  windows: {
+    label: "Windows",
+    short: "Win",
+    format: ".exe",
+    note: "Windows 10 or later",
+  },
+  macos: {
+    label: "macOS",
+    short: "Mac",
+    format: ".dmg",
+    note: "macOS 11 Big Sur or later",
+  },
+  linux: {
+    label: "Linux",
+    short: "Linux",
+    format: ".tar.gz",
+    note: "Any modern x86_64 distro",
+  },
+};
+
+/** One downloadable artifact for a desktop OS (per-arch) */
+export interface OsBuild {
+  os: DesktopOs;
+  /** chip selector label, e.g. "64-bit" or "Apple Silicon" */
+  arch: string;
+  format: string;
+  /** human file size, e.g. "13 MB" */
+  size: string;
+  url: string;
+}
 
 export interface DownloadConfig {
   id: PlatformId;
   platform: string;
-  /** e.g. "Windows 10/11 · macOS" — leave empty until verified */
+  /** e.g. "Windows 10 or later · macOS 11+ · Linux x86_64" */
   requirements: string;
-  /** e.g. "v1.4.2" — leave empty until verified */
+  /** e.g. "v2.0.3" — leave empty until verified */
   version: string;
-  /** Set to a real URL to enable the download button */
+  /** Primary link — the default (Windows x64) desktop build, or the APK */
   downloadUrl: string | null;
+  /** Desktop per-OS / per-arch builds (empty for TV) */
+  builds: OsBuild[];
+  /** default install steps; desktop cards use per-OS steps from OS_STEPS */
   installSteps: string[];
 }
+
+const DESKTOP_BASE =
+  "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.3";
 
 export const DOWNLOADS: DownloadConfig[] = [
   {
     id: "desktop",
     platform: "Desktop / PC",
-    requirements: "Windows 10 or later · 64-bit · portable (no install)",
-    version: "v2.0.1",
-    downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.1/Bitify-2.0.1-windows-x64-portable.zip",
-    installSteps: [
-      "Download the Bitify Music portable zip for Windows.",
-      "Extract the zip and open Bitify — no installation needed.",
-      "Start listening from anywhere, including a USB drive.",
-    ],
-  },
-  {
-    id: "macos",
-    platform: "macOS",
-    requirements: "macOS · Apple Silicon (ARM64) · DMG installer",
+    requirements: "Windows 10+ · macOS 11+ · Linux x86_64",
     version: "v2.0.3",
-    downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.3/ytm-rs-setup-2.0.3-macos-arm64.dmg",
-    installSteps: [
-      "Download the Bitify Music DMG for Apple Silicon Macs.",
-      "Open the DMG and drag Bitify Music into your Applications folder.",
-      "Launch it from Applications — macOS may ask to confirm on first open.",
+    downloadUrl: `${DESKTOP_BASE}/Bitify-2.0.3-windows-x64-setup.exe`,
+    builds: [
+      {
+        os: "windows",
+        arch: "64-bit",
+        format: ".exe",
+        size: "13 MB",
+        url: `${DESKTOP_BASE}/Bitify-2.0.3-windows-x64-setup.exe`,
+      },
+      {
+        os: "windows",
+        arch: "ARM64",
+        format: ".exe",
+        size: "13 MB",
+        url: `${DESKTOP_BASE}/Bitify-2.0.3-windows-arm64-setup.exe`,
+      },
+      {
+        os: "macos",
+        arch: "Apple Silicon",
+        format: ".dmg",
+        size: "16 MB",
+        url: `${DESKTOP_BASE}/ytm-rs-setup-2.0.3-macos-arm64.dmg`,
+      },
+      {
+        os: "macos",
+        arch: "Intel",
+        format: ".dmg",
+        size: "17 MB",
+        url: `${DESKTOP_BASE}/ytm-rs-setup-2.0.3-macos-x64.dmg`,
+      },
+      {
+        os: "linux",
+        arch: "x86_64",
+        format: ".tar.gz",
+        size: "19 MB",
+        url: `${DESKTOP_BASE}/ytm-rs-2.0.3-linux-x86_64.tar.gz`,
+      },
     ],
-  },
-  {
-    id: "linux",
-    platform: "Linux",
-    requirements: "Linux x86_64 · tar.gz archive",
-    version: "v2.0.3",
-    downloadUrl:
-      "https://github.com/vishnu893-maker/bitify-updates/releases/download/desktop-v2.0.3/ytm-rs-2.0.3-linux-x86_64.tar.gz",
     installSteps: [
-      "Download the Linux x86_64 tarball.",
-      "Extract it with: tar -xzf ytm-rs-2.0.3-linux-x86_64.tar.gz",
-      "Open the extracted folder and run the Bitify Music executable.",
+      "Download the Bitify Music setup for your computer.",
+      "Run the installer and follow the on-screen steps.",
+      "Open Bitify Music and start listening.",
     ],
   },
   {
@@ -92,6 +148,15 @@ export const DOWNLOADS: DownloadConfig[] = [
     version: "v1.8.4",
     downloadUrl:
       "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.8.4/Bitify-1.8.4-arm64.apk",
+    builds: [
+      {
+        os: "linux", // not used — mobile card renders its own single APK row
+        arch: "ARM64",
+        format: ".apk",
+        size: "70 MB",
+        url: "https://github.com/vishnu893-maker/bitify-updates/releases/download/v1.8.4/Bitify-1.8.4-arm64.apk",
+      },
+    ],
     installSteps: [
       "Download the Bitify Music APK on your Android phone.",
       "Open the file and tap Allow if Android asks to install from your browser.",
@@ -104,6 +169,7 @@ export const DOWNLOADS: DownloadConfig[] = [
     requirements: "", // TODO: add verified TV platform support
     version: "",
     downloadUrl: null, // TODO: set TV store listing link
+    builds: [],
     installSteps: [
       "Find Bitify Music in your TV's app store.",
       "Install the app on your television.",
@@ -112,14 +178,35 @@ export const DOWNLOADS: DownloadConfig[] = [
   },
 ];
 
+/** Per-OS install steps for the desktop download card */
+export const OS_STEPS: Record<DesktopOs, string[]> = {
+  windows: [
+    "Download the Bitify Music setup for Windows.",
+    "Run the .exe installer and follow the on-screen steps.",
+    "Open Bitify Music and start listening.",
+  ],
+  macos: [
+    "Download the Bitify Music .dmg for your Mac.",
+    "Open the disk image and drag Bitify Music to Applications.",
+    "Launch Bitify Music from your Applications folder.",
+  ],
+  linux: [
+    "Download the Bitify Music tarball for Linux.",
+    "Extract it and run the bitify binary inside.",
+    "Optional: create a .desktop entry to pin it to your launcher.",
+  ],
+};
+
+/** Canonical origin. Change this one value when a custom domain goes live. */
+export const SITE_URL = "https://bitifyy.vercel.app";
+
 /**
- * Dedicated, indexable landing pages for each platform. Content is derived
- * from the product facts already published on the homepage — no invented
- * specs, pricing or availability.
+ * Data for the dedicated, indexable platform pages. Built from the current
+ * release URLs so these pages never drift from the downloads section.
  */
 export interface PlatformPageData {
   slug: string;
-  id: PlatformId;
+  id: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -133,88 +220,59 @@ export interface PlatformPageData {
   requirements: string;
 }
 
+const desktopDl = DOWNLOADS.find((d) => d.id === "desktop");
+const mobileDl = DOWNLOADS.find((d) => d.id === "mobile");
+const tvDl = DOWNLOADS.find((d) => d.id === "tv");
+const buildFor = (os: DesktopOs) => desktopDl?.builds?.find((b) => b.os === os);
+
 export const PLATFORM_PAGES: PlatformPageData[] = [
   {
     slug: "windows",
     id: "desktop",
     eyebrow: "For Windows",
-    title: "Bitify Music for Windows — Portable Music Player",
+    title: "Bitify Music for Windows — Desktop Music Player",
     description:
-      "Download Bitify Music for Windows: a portable x64 player with synced lyrics, playlists, listening stats and a full-screen Now Playing view. No installation needed.",
+      "Download Bitify Music for Windows: a desktop player with synced lyrics, playlists, listening stats and a full-screen Now Playing view. Version 2.0.3.",
     h1: "Bitify Music for Windows",
     intro:
-      "A full listening studio for your Windows desktop. Extract the portable app and get a persistent player bar, keyboard-first controls and a Now Playing view built for losing yourself in an album.",
+      "A full listening studio for your Windows desktop. Get the persistent player bar, keyboard-first controls and a Now Playing view built for losing yourself in an album.",
     highlights: [
-      {
-        title: "Portable by design",
-        text: "It's a zip, not an installer. Extract it to any folder — or a USB drive — and run Bitify without changing your system.",
-      },
-      {
-        title: "Every part of your library",
-        text: "Liked Music, playlists, listening stats and streaks, search, synced lyrics and full-screen artwork all live in one place.",
-      },
-      {
-        title: "One experience, every screen",
-        text: "The same Bitify experience you know from Android and TV, tuned for the bigger desktop display.",
-      },
+      { title: "A desktop app, not a web page", text: "Native setup for Windows 10 or later, with the controls and library you expect from Bitify." },
+      { title: "Every part of your library", text: "Liked Music, playlists, listening stats and streaks, search, synced lyrics and full-screen artwork." },
+      { title: "One experience, every screen", text: "The same Bitify experience you know on macOS, Linux, Android and TV, tuned for the desktop." },
     ],
-    steps: DOWNLOADS.find((d) => d.id === "desktop")?.installSteps ?? [],
+    steps: OS_STEPS.windows,
     faqs: [
-      {
-        question: "Do I need administrator rights?",
-        answer:
-          "No. The Windows build is portable — extract the zip and run the executable. There is no installer and no system-wide change.",
-      },
-      {
-        question: "Can I run Bitify Music from a USB drive?",
-        answer:
-          "Yes. Because the app is portable, you can keep it on removable storage and take your setup with you.",
-      },
+      { question: "Which Windows versions are supported?", answer: "The desktop build targets Windows 10 or later, 64-bit." },
+      { question: "What's in the download?", answer: "A Windows installer (.exe). Run it and follow the on-screen steps to get started." },
     ],
-    downloadUrl: DOWNLOADS.find((d) => d.id === "desktop")?.downloadUrl ?? null,
-    version: DOWNLOADS.find((d) => d.id === "desktop")?.version ?? "",
-    requirements: DOWNLOADS.find((d) => d.id === "desktop")?.requirements ?? "",
+    downloadUrl: buildFor("windows")?.url ?? desktopDl?.downloadUrl ?? null,
+    version: desktopDl?.version ?? LATEST_VERSIONS.desktop,
+    requirements: OS_META.windows.note + " · 64-bit installer",
   },
   {
     slug: "mac",
     id: "macos",
     eyebrow: "For macOS",
-    title: "Bitify Music for Mac — Apple Silicon Music Player",
+    title: "Bitify Music for Mac — macOS Music Player",
     description:
-      "Download Bitify Music for macOS on Apple Silicon: a DMG installer with synced lyrics, playlists, listening stats and a full-screen player. Version 2.0.3.",
+      "Download Bitify Music for macOS: a DMG installer with synced lyrics, playlists, listening stats and a full-screen player. Version 2.0.3.",
     h1: "Bitify Music for Mac",
     intro:
-      "Your library on Apple Silicon. The macOS build brings the same lyrics, playlists, listening stats and full-screen artwork to your Mac in a familiar DMG installer.",
+      "Your library on your Mac. The macOS build brings the same lyrics, playlists, listening stats and full-screen artwork in a familiar DMG installer.",
     highlights: [
-      {
-        title: "Built for Apple Silicon",
-        text: "This build targets macOS on ARM64 (Apple Silicon) hardware and ships as a standard DMG.",
-      },
-      {
-        title: "Familiar macOS setup",
-        text: "Open the DMG, drag Bitify Music to Applications, and launch it like any other Mac app.",
-      },
-      {
-        title: "The same library, everywhere",
-        text: "Continue with the playlists, Liked Music and listening stats you use on Windows, Android and TV.",
-      },
+      { title: "Familiar macOS setup", text: "Open the DMG and drag Bitify Music to Applications, then launch it like any other Mac app." },
+      { title: "Built for Apple Silicon", text: "An Apple Silicon build is available, with an Intel build for older Macs." },
+      { title: "The same library, everywhere", text: "Continue with the playlists, Liked Music and listening stats you use on other screens." },
     ],
-    steps: DOWNLOADS.find((d) => d.id === "macos")?.installSteps ?? [],
+    steps: OS_STEPS.macos,
     faqs: [
-      {
-        question: "Does this build work on Intel Macs?",
-        answer:
-          "This release is built for Apple Silicon (ARM64) Macs. An Intel build is not published yet.",
-      },
-      {
-        question: "How do I install the DMG?",
-        answer:
-          "Download the DMG, open it, drag Bitify Music into your Applications folder, then launch it from Applications. macOS may ask you to confirm on first open.",
-      },
+      { question: "Does this build work on Intel Macs?", answer: "Yes — both Apple Silicon and Intel DMG builds are available in the Downloads section." },
+      { question: "How do I install the DMG?", answer: "Download the DMG, open it, drag Bitify Music into Applications, then launch it." },
     ],
-    downloadUrl: DOWNLOADS.find((d) => d.id === "macos")?.downloadUrl ?? null,
-    version: DOWNLOADS.find((d) => d.id === "macos")?.version ?? "",
-    requirements: DOWNLOADS.find((d) => d.id === "macos")?.requirements ?? "",
+    downloadUrl: buildFor("macos")?.url ?? null,
+    version: desktopDl?.version ?? LATEST_VERSIONS.desktop,
+    requirements: OS_META.macos.note + " · Apple Silicon · DMG",
   },
   {
     slug: "linux",
@@ -225,37 +283,20 @@ export const PLATFORM_PAGES: PlatformPageData[] = [
       "Download Bitify Music for Linux x86_64: a standalone tar.gz with synced lyrics, playlists, listening stats and a full-screen player. Version 2.0.3.",
     h1: "Bitify Music for Linux",
     intro:
-      "A standalone player for Linux desktops. Download the x86_64 tarball, extract it and run Bitify — no package manager, no install step, no root access required.",
+      "A standalone player for Linux desktops. Download the x86_64 tarball, extract it and run Bitify — no package manager required.",
     highlights: [
-      {
-        title: "Standalone tarball",
-        text: "The Linux build is distributed as a tar.gz archive. Unpack it and run the executable from a folder you control.",
-      },
-      {
-        title: "No system changes",
-        text: "Because it runs from the extracted folder, Bitify doesn't need to be installed system-wide.",
-      },
-      {
-        title: "All the listening tools",
-        text: "Search, Liked Music, playlists, listening stats, synced lyrics and full-screen artwork are all included.",
-      },
+      { title: "Standalone tarball", text: "The Linux build is a tar.gz archive. Unpack it and run the binary from a folder you control." },
+      { title: "No system changes", text: "It runs from the extracted folder, so there's no system-wide installation." },
+      { title: "All the listening tools", text: "Search, Liked Music, playlists, listening stats, synced lyrics and full-screen artwork are included." },
     ],
-    steps: DOWNLOADS.find((d) => d.id === "linux")?.installSteps ?? [],
+    steps: OS_STEPS.linux,
     faqs: [
-      {
-        question: "Which Linux systems are supported?",
-        answer:
-          "This build targets Linux on x86_64 processors and runs from an extracted tarball. Check the download requirements before grabbing it.",
-      },
-      {
-        question: "Do I need root access?",
-        answer:
-          "No. Extract the archive into your own folder and run the Bitify Music executable from there.",
-      },
+      { question: "Which Linux systems are supported?", answer: "The build targets modern x86_64 Linux distributions and runs from an extracted tarball." },
+      { question: "Do I need root access?", answer: "No. Extract the archive into your own folder and run the binary from there." },
     ],
-    downloadUrl: DOWNLOADS.find((d) => d.id === "linux")?.downloadUrl ?? null,
-    version: DOWNLOADS.find((d) => d.id === "linux")?.version ?? "",
-    requirements: DOWNLOADS.find((d) => d.id === "linux")?.requirements ?? "",
+    downloadUrl: buildFor("linux")?.url ?? null,
+    version: desktopDl?.version ?? LATEST_VERSIONS.desktop,
+    requirements: OS_META.linux.note + " · tar.gz",
   },
   {
     slug: "android",
@@ -268,35 +309,18 @@ export const PLATFORM_PAGES: PlatformPageData[] = [
     intro:
       "Your music in your pocket. Quick picks, synced lyrics and a one-handed player that goes wherever you do — with the same library you know from desktop and TV.",
     highlights: [
-      {
-        title: "Made for one hand",
-        text: "Search, likes and playback controls stay within thumb reach, with full-screen album artwork when you want it.",
-      },
-      {
-        title: "Lyrics that keep up",
-        text: "Synced lyrics and a Now Playing view turn a phone into a proper listening device.",
-      },
-      {
-        title: "Direct APK download",
-        text: "The ARM64 APK is available straight from the release — no app store account required.",
-      },
+      { title: "Made for one hand", text: "Search, likes and playback controls stay within thumb reach, with full-screen artwork when you want it." },
+      { title: "Lyrics that keep up", text: "Synced lyrics and a Now Playing view turn a phone into a proper listening device." },
+      { title: "Direct APK download", text: "The ARM64 APK is available straight from the release — no app store account required." },
     ],
-    steps: DOWNLOADS.find((d) => d.id === "mobile")?.installSteps ?? [],
+    steps: mobileDl?.installSteps ?? [],
     faqs: [
-      {
-        question: "Is Bitify Music on Google Play?",
-        answer:
-          "The Android build is currently distributed as an APK from the Downloads section of this site. A Play Store listing has not been published yet.",
-      },
-      {
-        question: "Which Android devices does it support?",
-        answer:
-          "This APK is built for 64-bit ARM (ARM64) Android devices.",
-      },
+      { question: "Is Bitify Music on Google Play?", answer: "The Android build is currently distributed as an APK from the Downloads section of this site." },
+      { question: "Which Android devices does it support?", answer: "This APK is built for 64-bit ARM (ARM64) Android devices." },
     ],
-    downloadUrl: DOWNLOADS.find((d) => d.id === "mobile")?.downloadUrl ?? null,
-    version: DOWNLOADS.find((d) => d.id === "mobile")?.version ?? "",
-    requirements: DOWNLOADS.find((d) => d.id === "mobile")?.requirements ?? "",
+    downloadUrl: mobileDl?.downloadUrl ?? null,
+    version: mobileDl?.version ?? LATEST_VERSIONS.mobile,
+    requirements: mobileDl?.requirements ?? "Android · 64-bit (ARM64) · APK installer",
   },
   {
     slug: "tv",
@@ -309,44 +333,28 @@ export const PLATFORM_PAGES: PlatformPageData[] = [
     intro:
       "Bring music into the room. The TV experience is built around large artwork, a queue everyone can see, and controls made for a remote instead of a mouse.",
     highlights: [
-      {
-        title: "Made for the big screen",
-        text: "Full-screen artwork and lyrics that read from across the room.",
-      },
-      {
-        title: "A queue for everyone",
-        text: "See what's playing and what's next without reaching for a phone.",
-      },
-      {
-        title: "One ecosystem",
-        text: "The same Bitify listening experience you use on desktop, Mac, Linux and Android.",
-      },
+      { title: "Made for the big screen", text: "Full-screen artwork and lyrics that read from across the room." },
+      { title: "A queue for everyone", text: "See what's playing and what's next without reaching for a phone." },
+      { title: "One ecosystem", text: "The same Bitify listening experience you use on Windows, macOS, Linux and Android." },
     ],
-    steps: DOWNLOADS.find((d) => d.id === "tv")?.installSteps ?? [],
+    steps: tvDl?.installSteps ?? [],
     faqs: [
-      {
-        question: "Is the TV app available to download?",
-        answer:
-          "The TV experience is presented on this site. Its download link will be published in the Downloads section as soon as it goes live.",
-      },
-      {
-        question: "What kind of TVs is it for?",
-        answer:
-          "It's designed for smart TVs and Android TV-style interfaces, with navigation built around a remote.",
-      },
+      { question: "Is the TV app available to download?", answer: "The TV experience is presented on this site. Its download link will be published in the Downloads section when it goes live." },
+      { question: "What kind of TVs is it for?", answer: "It's designed for smart TVs and Android TV-style interfaces, with navigation built around a remote." },
     ],
-    downloadUrl: DOWNLOADS.find((d) => d.id === "tv")?.downloadUrl ?? null,
-    version: DOWNLOADS.find((d) => d.id === "tv")?.version ?? "",
-    requirements: DOWNLOADS.find((d) => d.id === "tv")?.requirements ?? "",
+    downloadUrl: tvDl?.downloadUrl ?? null,
+    version: tvDl?.version ?? "",
+    requirements: tvDl?.requirements ?? "",
   },
 ];
 
 export const NAV_LINKS = [
-  { label: "Experience", href: "#experience" },
-  { label: "Desktop", href: "#desktop" },
-  { label: "Mobile", href: "#mobile" },
-  { label: "TV", href: "#tv" },
+  { label: "Showcase", href: "#showcase" },
+  { label: "Features", href: "#features" },
+  { label: "Integrations", href: "#integrations" },
+  { label: "Crew", href: "#crew" },
   { label: "Downloads", href: "/downloads" },
+  { label: "FAQ", href: "/faq" },
 ] as const;
 
 export const DESKTOP_NAV_ITEMS = [
@@ -368,17 +376,17 @@ export const FAQ_ITEMS = [
   {
     question: "Which platforms support Bitify Music?",
     answer:
-      "Bitify Music runs on Windows (a portable x64 app that needs no installation), macOS on Apple Silicon (DMG), Linux x86_64 (tar.gz), Android via an ARM64 APK, and as a dedicated TV app. One library and the same listening experience on every screen.",
+      "Bitify Music runs on Windows, macOS and Linux as a desktop application, on Android phones, and on TVs — one unified product across every screen. The desktop builds ship for x64 and ARM64 machines, including native Apple Silicon and Intel Macs.",
   },
   {
     question: "How can I download Bitify Music?",
     answer:
-      "Windows (portable zip), macOS (Apple Silicon DMG), Linux (x86_64 tarball) and Android (ARM64 APK) builds are available now — grab yours from the Downloads section. The TV app's link will be published there as soon as it goes live.",
+      "Bitify Music for Windows, macOS and Linux, plus the Android app (APK), are available now — grab them from the Downloads section of this page. The TV app's link will be published there as soon as it goes live.",
   },
   {
     question: "How do I install the desktop version?",
     answer:
-      "Extract the downloaded portable zip and open Bitify Music — no installation needed. Press play and your library is ready.",
+      "Once the installer is downloaded, run it and follow the on-screen steps. When installation finishes, open Bitify Music on your computer and press play — your library is ready.",
   },
   {
     question: "Does Bitify Music support TV devices?",
@@ -392,46 +400,35 @@ export const FAQ_ITEMS = [
   },
 ] as const;
 
-/** Screenshot registry — swap paths here when new captures are available */
-export const SCREENSHOTS = {
-  desktop: {
-    home: "/assets/desktop/desktop-home.webp",
-    library: "/assets/desktop/desktop-library-real.webp",
-    lyrics: "/assets/desktop/desktop-nowplaying.webp",
-    /** dedicated hero copy (kept separate so the hero can preload it eagerly
-     *  while the same screenshot appears lazily further down the page) */
-    hero: "/assets/desktop/desktop-hero.webp",
+export const DESKTOP_SHOTS: DesktopShot[] = [
+  {
+    src: "/assets/desktop/desktop-home.webp",
+    width: 1497,
+    height: 967,
+    label: "Home",
+    alt: "Bitify Music desktop app — Home with listening stats, song mixes and Listen Again shelves",
   },
-  tv: {
-    nowplaying: "/assets/tv/tv-nowplaying.webp",
-    fullscreen: "/assets/tv/tv-fullscreen.webp",
-    /** bezel-free Lyrics capture shown in the Features “centrepiece” */
-    spotlight: "/assets/tv/tv-lyrics-spotlight.webp",
+  {
+    src: "/assets/desktop/desktop-lyrics.webp",
+    width: 1497,
+    height: 968,
+    label: "Now Playing",
+    alt: "Bitify Music desktop app — Now Playing with large album art and karaoke-style synced lyrics",
   },
-  promo: {
-    warm: "/assets/promo/promo-lyrics-warm.webp",
-    dark: "/assets/promo/promo-home-dark.webp",
-    lifestyle: "/assets/promo/promo-lifestyle-hand.webp",
+  {
+    src: "/assets/desktop/desktop-explore.webp",
+    width: 1490,
+    height: 963,
+    label: "Explore",
+    alt: "Bitify Music desktop app — Explore with moods & genres, new releases and charts",
   },
-  brand: {
-    logo: "/assets/brand/bitify-logo.png",
-  },
+];
+
+/** Latest shipping versions — surfaced in the hero badge and CTA banner */
+export const LATEST_VERSIONS = {
+  desktop: "v2.0.3",
+  mobile: "v1.8.4",
 } as const;
-
-/**
- * Canonical origin for metadata, canonical tag, sitemap and schema.
- * Change this one value when a custom domain goes live (also update
- * robots.txt and the Google Search Console property).
- */
-export const SITE_URL = "https://bitifyy.vercel.app";
-
-/**
- * Live total page-view counter badge (free abacus.jasoncameron.dev hit API).
- * Incremented client-side once per page load; hidden silently if unreachable.
- * Note: counts views, not unique visitors — it has no identity tracking.
- */
-export const VISITOR_COUNTER_URL =
-  "https://abacus.jasoncameron.dev/hit/bitify-website/total-views";
 
 /**
  * Real TV cutouts — cropped straight from the product photography with
@@ -466,94 +463,95 @@ export interface MobileScreen {
 }
 
 export const MOBILE_SCREENS: Record<string, MobileScreen> = {
+  home: {
+    src: "/assets/mobile/shots/shot-home.webp",
+    width: 720,
+    height: 1478,
+    label: "Home",
+    alt: "Bitify Music mobile app — Home with Listen Now, recents and song mixes",
+    blur:
+      "data:image/webp;base64,UklGRmYBAABXRUJQVlA4IFoBAACQBwCdASoYADEAPulapk0pJKOiM/ZqqSAdCWIAzNQJ90Uq3m+1xWHW40iKpMKE0x8EOueK/L7VG7jbSiYFew+8U5rvkIAA/u+paei+b8Ex/fYiMZ75f9yS2E35/m3b5dNXos+VbWekHHzhfC58dkhE9ZzoqJR2vAfkrBfppNelplu1LOxlclqTRLBnOQ/MQmHeOqqIgX+zTfIz8SU73KsL4nuzrWe0CUWiu4NwDsiK923ENb0ftD4TwtMhPOCAiGjFxumuOEO7O7jK9ZkbQQJIEjwI4KcC9Lk6/8XtBmWCC3pJvNNXqymGPfRjeOyILyeat3xTaAwd54GtZZ1y6LubdMIAA8JHBOyEPe6psYQ4h1T9ANg66sYWEgQqEUEdDGKkkIn/foFvKfIXIHJh2K8ervZPAKcPwg+n0tRYx4ItK+Ys4kGOrekq+T4RyM3nsn31FjP0T/Ij/AAA",
+  },
   nowplaying: {
     src: "/assets/mobile/shots/shot-nowplaying.webp",
     width: 720,
-    height: 1474,
+    height: 1518,
     label: "Now Playing",
     alt: "Bitify Music mobile app — Now Playing with full-screen album artwork and playback controls",
     blur:
-      "data:image/webp;base64,UklGRpoAAABXRUJQVlA4II4AAABQBACdASoQACEAPvVkqE+qpaOiNUgBUB6JQBS1hRP3dMHEOAJJ9fINXDIAAP68adg6IxLJJoPVR0pHybQSbtIdtKcv2PbN6uGtwtwHMeb/MyEvglnmfFQfE1XShvepg2knxX70YM8tDXWj1QviFo0doB1/v5/kIKRY4ffa7Sj5ec9yU9VbuSsuWP7uJ6AA",
+      "data:image/webp;base64,UklGRooBAABXRUJQVlA4IH4BAABwCACdASoYADMAPulcqU+pJKOiMBQMASAdCWoAuzNkJb4GXUZOm4+EdFWb8qoAWTnp3t/NsT+PN4C5nAWd9X7wZOMHItVmeW7k+/j4AP7p/ilO4JysUkFx2CS/x9f+kxg/zkLPpT2Q1NeWQBzpNnHDPk2bXWN07Ask5394GsgR/8WJGnJ4b7xUdVph1b3CCOKP0UDhMV/jzZnav+3/0hds5KFwgvRls+iT6V7T/OrqRHlDU2raSXx445d/2fFJoK0YGZtcWUanP4CaxtgVB6LyyalphYhHUumiGJWco0KpqgjXNhufwGj492aoilj24qpZIXeuEuo0zlNtQ3CVXccejMet/XucnzFjd/3PV3AMFZDo1IHnhp55G7IIeVOJweTqK/ylir2N6EdT43g02LqXwwtBf0N2zlRuKVsvzhmm2kuLEN2eVG6R2WqT+qu2xJmrzIHSdt8Xa6DjtD1gSQ8ueUi46uFnYzT94zckirzuDUeIQUhb4uz/6AAGwAAA",
   },
   lyrics: {
     src: "/assets/mobile/shots/shot-lyrics.webp",
     width: 720,
-    height: 1466,
+    height: 1600,
     label: "Lyrics",
-    alt: "Bitify Music mobile app — synced lyrics view",
+    alt: "Bitify Music mobile app — time-synced lyrics with the mini player",
     blur:
-      "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAADwAwCdASoQACEAPwl0rVErpqQiqqwBcCEJaQDMWAz4N/GMUPcRMC/AAPzUrelUkzPd8s0FdkxhmswaQVCUA2XJlDD3ocuCTsmcYLpBhtC3Xx2oAAA=",
+      "data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAADwBgCdASoYADUAPuFUpU0opCOiMBv9+RAcCWkA0fgZG/9GoUsQpFk3q9ip10G/A50Ju+FKO9mszDv1GnT1fPQAAP6meNQdxQal2N7rboSq6yC5SbPHEqbTEkwpDHHUN38UjEunUVKYOvd3+H6rtcL7iYhgCLAwz616EbP+UZLlVudctP6CW1lEZhcDSiKpyyi1hs7eC7HaaLIk4iKtXZtG5TPY7xroO4RUzW0+cKxbTl6vIzj45KLo0xHoShKkIIQIdfjMBso459fLBKzCAAAA",
   },
-  player: {
-    src: "/assets/mobile/shots/shot-player.webp",
+  singalong: {
+    src: "/assets/mobile/shots/shot-singalong.webp",
     width: 720,
     height: 1471,
-    label: "Full Player",
-    alt: "Bitify Music mobile app — full player controls for the current track",
+    label: "Sing Along",
+    alt: "Bitify Music mobile app — Sing Along view with word-synced lyrics",
     blur:
-      "data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADQAwCdASoQACEAPvVkqE+qpaQiNUgBUB6JaQAAUmB2WxK1FIm6HgAA/NS0ge9vMQr9HdDhkm2twR79zpNoMc9ih/OgH5D6Rmduq2oV1AGwYmow9yQq5r8N+NV0ls+1bPhAAA==",
-  },
-  library: {
-    src: "/assets/mobile/shots/shot-library.webp",
-    width: 720,
-    height: 1496,
-    label: "Library",
-    alt: "Bitify Music mobile app — Library with listening stats, streaks and playlists",
-    blur:
-      "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAAAQBACdASoQACEAPwVsrE+rpiQiNVgIAXAgiUAXBgLNYQqs/oDXFJJ4MAD+7qcLUR8KIXub6p2efl3sWcCR6y+fijz5A1fsTAcRPghph0Hj6bDIhx+C8+7W1dyF/cVH6dugCy+yZ8fW2y+lyqD7fkGukSssGByhZ4TrNDJN/cmfGgAA",
-  },
-  search: {
-    src: "/assets/mobile/shots/shot-search.webp",
-    width: 720,
-    height: 1503,
-    label: "Search",
-    alt: "Bitify Music mobile app — Search results with songs and albums",
-    blur:
-      "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAAAQBACdASoQACEAPwlwsVArpiSiqqwBcCEJZwAAumqvwyCaserClgsiAAD+9tr9hQuJjOh/eQm06YEKEoseR0Mj0+75zHotZoLJUB56zQ+HFUdY+brIR6fweQsonSEPCZSRuWtNvDYgQ4e0UU2IVDJAAAA=",
+      "data:image/webp;base64,UklGRtAAAABXRUJQVlA4IMQAAAAwBgCdASoYADEAPulsrVEpJiQiqBgKqSAdCWkAzUgbEnzehyaWNF+5f/M9Bu+WU6/ZVJDgxmrMVGMAAPjX+2njOUMzQWUJ18BI5kZDNHXXYVdYLb/XgFdavxgJClOdzcPeq13KECFqFbF8bPJci/eYsY7r9GqJw+Qr0hzRDwaCUWHTfVWKlRgX8hKZdL8tPxMlMpsegg/VXIzHGcPuAC/BwtleHMoAHnmojJzxYZYT7xbYW25og/mVkx7UR/gwGvwyAAAA",
   },
   explore: {
     src: "/assets/mobile/shots/shot-explore.webp",
     width: 720,
-    height: 1490,
+    height: 1475,
     label: "Explore",
-    alt: "Bitify Music mobile app — Explore view with mood and activity playlists",
+    alt: "Bitify Music mobile app — Explore with moods, activities and categories",
     blur:
-      "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAADQBACdASoQACEAPvVkqU+qpaQiNUgBUB6JYgCw7C+/gJ/b/OSZ/tmMOjsfug2MQAD+8QQvdEbdeKNh5Q6umwgRDRyrs732JwnTe+5nk494G3CwiKX7wcCsYtd7/inNEdSMLTjUPcTCnDJ9iFIGTaijaGZ3fCNHnXU2yFYXNKxWUqfdiBrK9AVRjFLfiwV/oiVeKRP+QQ4nR03KfllI/zJmXSjHT4D/ipGf0fFAAAA=",
+      "data:image/webp;base64,UklGRnABAABXRUJQVlA4IGQBAABwBwCdASoYADEAPulmqU0pJiQiLBqsySAdCWYAv9FlA6812VAPDhGKlm3a88+TzTCjX51il4kQPdughm+Du0F/CSEtwAD+7SE9vJMGuBitw7A648OGYgyaS98U/lL3zeo9f6nE6BNCFyiHq+fMXZIAaUkjsFnNKcfpjyt0sW7p++j93Dihhuhd5g3WwwT/1dAlj2cs1JqSMKWoHHifH7uvvwUcxmc2S4ap5atC2fqsnFtsWP0nJxrWLvf49LsKDRjOKSvacDT4YQM5Fe3tbxiifxY0+m0DYoPw2WPcAp8LYWFLoTx0J4LWlF+gAHBDPvmMjoqE/8/L/GN/kD0Vi+fWLON4BYCEyMsqX3N5EQIN3Kg9Q86KuWVMjJGI+AxCi7grKc1ixmw2Bt1rJ5w+6EdcA6eKo7f5avMb8O2nHf4dzA/o/+tez95LlSEY2hR0c4/Lnir0livOKdq5qNgcmRHylq+AAAA==",
   },
-  party: {
-    src: "/assets/mobile/shots/shot-party.webp",
+  search: {
+    src: "/assets/mobile/shots/shot-search.webp",
     width: 720,
-    height: 1484,
-    label: "Party",
-    alt: "Bitify Music mobile app — Listen Together party queue",
+    height: 1474,
+    label: "Search",
+    alt: "Bitify Music mobile app — Search with instant songs, albums and artists",
     blur:
-      "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAACQBACdASoQACEAPwluslArpiSiqqwBcCEJZQDNwEXug6w78yFAEZCOTE4QgAAA/vXc//kmHyW5+TOB9CRe3sgSfinXL8dL93FkOUc+0fhKIsWoRUyCd1k1LDAWYjsSqMGEFjaP3BbRgCNuwjp+nm8Qm3Z2fHIiovvjwQfC8rBexzeROF8gAA==",
-  },
-  liked: {
-    src: "/assets/mobile/shots/shot-liked.webp",
-    width: 720,
-    height: 1470,
-    label: "Liked",
-    alt: "Bitify Music mobile app — Liked Music playlist",
-    blur:
-      "data:image/webp;base64,UklGRqQAAABXRUJQVlA4IJgAAAAQBQCdASoQACEAPwFwq0+rJqOiNVgIAWAgCWwAnQHcAfa0j/MqskVAUjbg+pR1XosAAP7xgZmr7OPK/SYvREn7Qeae4cM1C1yU3n/aQ2dYZxUgChVv6mBNj3Uq4B64/lN8NRiIq7DyVYFiEBTUuEMUXauafvhC6ssIIFLse79qLX5h0JAq3kUXAnlQJ9k6nnlJtHvDhhAAAA==",
+      "data:image/webp;base64,UklGRuQAAABXRUJQVlA4INgAAABQBgCdASoYADEAPuloq1CpJaOirBVZmSAdCWcAyCAjHPZt87N3DpIk0DCh0+bd8vBgclb95IJES9EYAAD+9ZdfbIaNUIB/kUbqh2MMXSfjPja4PhXAzrLI/zR3zvnX5txVSZ3jeaHs+mECaru+cWzb4gOdEQl8LesOxorLkOfkkB10WyZS/fGXykOvaeQYmMcyF1vzx8JQ2W4igNZNIs+ziMDMIbfguNlNmPRKRv8x1afR1LFCz0qItvISKRdWLKwycPwbe/wXHFCMOnVddILAaBv22/YAAAA=",
   },
 };
 
 /**
- * Hero coverflow — the seven distinct app views, ordered so neighbouring
- * screens always contrast in mood and colour (artwork → grid → typography
- * → gradient → search → social → stats).
+ * Desktop app window captures — real screenshots at their intrinsic
+ * dimensions, presented inside the CSS WindowFrame (a macOS-style chrome
+ * built in the browser).
  */
-export const HERO_CAROUSEL: MobileScreen[] = [
-  MOBILE_SCREENS.nowplaying,
-  MOBILE_SCREENS.explore,
-  MOBILE_SCREENS.lyrics,
-  MOBILE_SCREENS.liked,
-  MOBILE_SCREENS.search,
-  MOBILE_SCREENS.party,
-  MOBILE_SCREENS.library,
-];
+export interface DesktopShot {
+  src: string;
+  width: number;
+  height: number;
+  label: string;
+  alt: string;
+}
+
+/**
+ * Live screen recordings with sound — presented muted by default with an
+ * unmute control (the user's music never auto-plays out loud). `poster` is
+ * the matching still capture shown while the video buffers (and forever,
+ * if the video can't load at all).
+ */
+export const LIVE_VIDEOS = {
+  desktop: {
+    src: "/assets/desktop/desktop-live.mp4",
+    poster: "/assets/desktop/desktop-lyrics.webp",
+    label: "Live",
+    alt: "Bitify Music desktop app — Now Playing with word-synced lyrics, screen recording",
+  },
+  tv: {
+    src: "/assets/tv/tv-live.mp4",
+    poster: "/assets/tv/tv-live-poster.webp",
+    label: "Live",
+    alt: "Bitify Music on TV — Now Playing screen recording",
+  },
+} as const;
 
 export const TV_SHOTS: Record<string, DeviceShot> = {
   nowplaying: {

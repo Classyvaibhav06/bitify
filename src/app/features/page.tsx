@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Features } from "@/components/site/features";
-import { Ecosystem } from "@/components/site/ecosystem";
+import { Showcase } from "@/components/site/showcase";
 
 export const metadata: Metadata = {
   title: "Bitify Music Features — Lyrics, Playlists, Stats & Every Screen",
@@ -28,7 +28,7 @@ export default function FeaturesPage() {
         </p>
       </div>
       <Features />
-      <Ecosystem />
+      <Showcase />
     </main>
   );
 }

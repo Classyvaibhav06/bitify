@@ -15,14 +15,15 @@ export function WindowFrame({ children, className }: { children: ReactNode; clas
         className
       )}
     >
-      {/* title bar */}
+      {/* title bar — like a real macOS window: traffic lights and a
+          plain sentence-case title, no letterspaced caps */}
       <div className="flex items-center gap-2 border-b border-white/[0.07] bg-[#16161c] px-4 py-2.5">
         <span className="flex gap-1.5" aria-hidden>
           <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]/80" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/80" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]/80" />
         </span>
-        <span className="mx-auto pr-10 font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
+        <span className="mx-auto pr-10 text-[11px] font-medium text-white/40">
           Bitify Music
         </span>
       </div>

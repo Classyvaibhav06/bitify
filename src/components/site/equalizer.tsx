@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +21,6 @@ interface EqualizerProps {
  * motion starts immediately, even before hydration, and never requires JS.
  * The pulse is deliberately pronounced — bars swing between ~22% and full
  * height with a spring-like rhythm — so it always reads as "music playing".
- * Falls back to a staggered static row of bars for reduced-motion users.
  */
 export function Equalizer({
   bars = 5,
@@ -31,8 +29,7 @@ export function Equalizer({
   static: staticProp = false,
   "aria-label": ariaLabel = "Audio equalizer",
 }: EqualizerProps) {
-  const reduce = useReducedMotion();
-  const isStatic = staticProp || !!reduce;
+  const isStatic = staticProp;
 
   // deterministic pseudo-random heights/weights per index
   const heights = [0.55, 1, 0.4, 0.8, 0.65, 0.9, 0.5, 0.75];

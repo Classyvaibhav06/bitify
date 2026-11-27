@@ -27,7 +27,7 @@ export default function NotFound() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-crimson px-7 py-3.5 text-sm font-semibold text-white shadow-[0_12px_40px_-8px_rgba(224,57,62,0.6)] transition-all duration-300 hover:bg-crimson-bright"
+            className="inline-flex items-center gap-2 rounded-full bg-crimson px-7 py-3.5 text-sm font-semibold text-white shadow-[0_12px_40px_-8px_rgb(var(--acc-rgb)/0.6)] transition-all duration-300 hover:bg-crimson-bright"
           >
             Back to the music
           </a>

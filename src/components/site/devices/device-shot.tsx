@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import type { DeviceShot } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ interface DeviceShotImageProps {
   /** sizes attribute for next/image optimization hints */
   sizes?: string;
   priority?: boolean;
-  /** gentle idle float (disabled for reduced-motion users) */
+  /** gentle idle float */
   float?: boolean;
   floatDuration?: number;
   /** "height" sizes by height (width auto); "width" spans full width */
@@ -33,8 +33,6 @@ export function DeviceShotImage({
   floatDuration = 7,
   fit = "height",
 }: DeviceShotImageProps) {
-  const reduce = useReducedMotion();
-
   const img = (
     <Image
       src={shot.src}
@@ -52,7 +50,7 @@ export function DeviceShotImage({
     />
   );
 
-  if (float && !reduce) {
+  if (float) {
     return (
       <motion.div
         animate={{ y: [0, -8, 0] }}
